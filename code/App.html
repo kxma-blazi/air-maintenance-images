@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <base target="_top" />
+    <meta charset="utf-8" />
+    <meta name="theme-color" content="#0e7c86" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f2f6f7;
+        --card: #fff;
+        --tx: #14262b;
+        --mu: #62767c;
+        --bd: #dde6e8;
+        --pri: #0e7c86;
+        --ok: #1f9d57;
+        --warn: #d99a00;
+        --bad: #d64545;
+        --org: #e9772b;
+        --blue: #2f6fdb;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0e1619;
+          --card: #162226;
+          --tx: #e5eef0;
+          --mu: #93a7ad;
+          --bd: #26363b;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font: 15px/1.5 'Noto Sans Thai', system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--tx);
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .wrap {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 0 14px 90px;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: var(--bg);
+        padding: calc(10px + env(safe-area-inset-top)) 0 8px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0;
+      }
+      .mu {
+        color: var(--mu);
+        font-size: 13px;
+      }
+      button,
+      select,
+      input,
+      textarea {
+        font: inherit;
+        color: var(--tx);
+      }
+      button {
+        cursor: pointer;
+        border: 1px solid var(--bd);
+        background: var(--card);
+        border-radius: 12px;
+        min-height: 44px;
+        padding: 0 14px;
+      }
+      button.pri {
+        background: var(--pri);
+        border-color: var(--pri);
+        color: #fff;
+        font-weight: 600;
+      }
+      button.dng {
+        color: var(--bad);
+        border-color: var(--bad);
+      }
+      button:disabled {
+        opacity: 0.55;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        font-size: 16px;
+        background: var(--card);
+        border: 1px solid var(--bd);
+        border-radius: 12px;
+        padding: 10px 12px;
+        min-height: 44px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin: 10px 0 0;
+      }
+      label > * {
+        margin-top: 4px;
+        font-weight: 400;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding: 8px 0 2px;
+        scrollbar-width: none;
+      }
+      .chip {
+        flex: none;
+        min-height: 38px;
+        border-radius: 20px;
+        padding: 0 14px;
+        font-size: 14px;
+      }
+      .chip.on {
+        background: var(--tx);
+        color: var(--bg);
+        border-color: var(--tx);
+      }
+      .chip b {
+        margin-left: 4px;
+      }
+      .alertbar {
+        background: #fff1dc;
+        color: #7a4b00;
+        border-radius: 12px;
+        padding: 10px 12px;
+        margin: 10px 0;
+        font-size: 13px;
+      }
+      .alertbar.info {
+        background: #e6f1ff;
+        color: #1b4a8a;
+      }
+      .sum {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .sum div {
+        background: var(--card);
+        border: 1px solid var(--bd);
+        border-radius: 12px;
+        padding: 8px 10px;
+        text-align: center;
+      }
+      .sum b {
+        display: block;
+        font-size: 20px;
+        line-height: 1.2;
+      }
+      .sum span {
+        font-size: 12px;
+        color: var(--mu);
+      }
+      .ac {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        background: var(--card);
+        border: 1px solid var(--bd);
+        border-left: 6px solid var(--c, #9aa);
+        border-radius: 14px;
+        padding: 10px 12px;
+        margin-top: 10px;
+        width: 100%;
+        text-align: left;
+        min-height: 76px;
+      }
+      .ac .id {
+        font-weight: 700;
+        font-size: 17px;
+      }
+      .ac .m {
+        flex: 1;
+        min-width: 0;
+      }
+      .ac .loc {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .tb {
+        position: relative;
+        flex: none;
+        width: 56px;
+        height: 56px;
+        border-radius: 10px;
+        background: var(--bd);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        overflow: hidden;
+      }
+      .tb img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      img.x {
+        display: none;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        color: #fff;
+        background: var(--c);
+      }
+      .empty {
+        text-align: center;
+        color: var(--mu);
+        padding: 40px 0;
+      }
+      .ov {
+        position: fixed;
+        inset: 0;
+        background: rgba(5, 12, 15, 0.55);
+        display: none;
+        align-items: flex-end;
+        justify-content: center;
+        z-index: 20;
+      }
+      .ov.on {
+        display: flex;
+      }
+      .sheet {
+        background: var(--bg);
+        width: 100%;
+        max-width: 640px;
+        max-height: 92vh;
+        overflow: auto;
+        border-radius: 20px 20px 0 0;
+        padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+      }
+      .sh {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .cover {
+        position: relative;
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--bd);
+        height: 170px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 52px;
+        margin: 12px 0 8px;
+      }
+      .cover img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .cover .cb {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        min-height: 36px;
+        font-size: 13px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        border: 0;
+        z-index: 1;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        margin: 8px 0;
+      }
+      .stats div {
+        background: var(--card);
+        border: 1px solid var(--bd);
+        border-radius: 12px;
+        padding: 6px 8px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--mu);
+      }
+      .stats b {
+        display: block;
+        font-size: 16px;
+        color: var(--tx);
+      }
+      .acts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 14px 0 4px;
+      }
+      .acts button {
+        min-height: 56px;
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .form {
+        background: var(--card);
+        border: 1px solid var(--bd);
+        border-radius: 14px;
+        padding: 12px;
+        margin-top: 8px;
+      }
+      .row2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .pk {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .pk.one {
+        grid-template-columns: 1fr;
+      }
+      .pb {
+        position: relative;
+        border: 2px dashed var(--bd);
+        border-radius: 12px;
+        min-height: 96px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 13px;
+        color: var(--mu);
+        overflow: hidden;
+        cursor: pointer;
+        margin: 0;
+        font-weight: 400;
+      }
+      .pb input {
+        display: none;
+      }
+      .pb img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .pb .rm {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        min-height: 30px;
+        padding: 0 10px;
+        z-index: 1;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        border: 0;
+      }
+      .err {
+        color: var(--bad);
+        font-size: 13px;
+        min-height: 18px;
+        margin-top: 6px;
+      }
+      .h {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--bd);
+        font-size: 14px;
+      }
+      .h:last-child {
+        border: 0;
+      }
+      .ths {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+      .ths .tb {
+        width: 64px;
+        height: 64px;
+        cursor: pointer;
+        border: 0;
+        padding: 0;
+      }
+      .hd {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .hd button {
+        min-height: 32px;
+        padding: 0 10px;
+        font-size: 12px;
+        flex: none;
+      }
+      h3 {
+        font-size: 15px;
+        margin: 18px 0 4px;
+      }
+      .toast {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: calc(20px + env(safe-area-inset-bottom));
+        background: var(--tx);
+        color: var(--bg);
+        padding: 10px 18px;
+        border-radius: 24px;
+        z-index: 40;
+        display: none;
+        max-width: 90vw;
+      }
+      .toast.on {
+        display: block;
+      }
+      .toast.bad {
+        background: var(--bad);
+        color: #fff;
+      }
+      #lb {
+        background: rgba(0, 0, 0, 0.92);
+        align-items: center;
+        z-index: 30;
+      }
+      #lb img {
+        max-width: 100%;
+        max-height: 88vh;
+        object-fit: contain;
+      }
+      #lb button {
+        position: absolute;
+        top: calc(12px + env(safe-area-inset-top));
+        right: 12px;
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        border: 0;
+      }
+      a {
+        color: var(--pri);
+      }
+      :focus-visible {
+        outline: 2px solid var(--pri);
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="top">
+          <div>
+            <h1>❄️ ดูแลแอร์</h1>
+            <div class="mu" id="upd">กำลังโหลด...</div>
+          </div>
+          <div style="display: flex; gap: 6px">
+            <button data-slopen aria-label="สลีปโอนเงิน">🧾</button>
+            <button id="rf" aria-label="รีเฟรช">🔄</button>
+          </div>
+        </div>
+        <input
+          id="q"
+          type="search"
+          placeholder="ค้นหารหัส / ห้อง / รุ่น"
+          style="margin-top: 8px"
+          aria-label="ค้นหา"
+        />
+        <div class="chips" id="chips"></div>
+      </header>
+      <div id="sum"></div>
+      <div id="warn"></div>
+      <div id="list"><div class="empty">กำลังโหลด...</div></div>
+      <p class="mu" style="text-align: center; margin-top: 24px">
+        <a href="<?= base ?>?v=classic"
+          >เปิดแดชบอร์ดเต็ม (ค่าไฟ / ช่าง / ประวัติ / เพิ่มแก้ไขแอร์)</a
+        >
+      </p>
+      <p style="text-align: center; margin-top: 8px">
+        <button data-ctopen>💬 ติดต่อผู้พัฒนาระบบ</button>
+      </p>
+    </div>
+
+    <div class="ov" id="ov" role="dialog" aria-modal="true">
+      <div class="sheet" id="sheet"></div>
+    </div>
+    <div class="ov" id="lb" role="dialog" aria-modal="true">
+      <button data-lbx aria-label="ปิด">✕</button><img id="lbi" alt="รูปขยาย" />
+    </div>
+    <div class="ov" id="sl" role="dialog" aria-modal="true">
+      <div class="sheet">
+        <div class="sh">
+          <div style="font-size: 20px; font-weight: 700">🧾 สลีปโอนเงิน</div>
+          <button data-slx aria-label="ปิด">✕</button>
+        </div>
+        <div class="form">
+          <label class="pb" id="sl-pb" style="min-height: 150px">
+            <span
+              >📷 แตะเพื่อถ่าย/เลือกรูปสลีป<br /><small
+                >ไม่ต้องกรอกอะไรเพิ่ม</small
+              ></span
+            >
+            <input type="file" accept="image/*" id="sl-file" />
+          </label>
+          <details style="margin-top: 10px">
+            <summary class="mu">เพิ่มรายละเอียด (ไม่บังคับ)</summary>
+            <label
+              >เครื่อง
+              <select id="sl-id">
+                <option value="">— ไม่ระบุ —</option>
+              </select>
+            </label>
+            <label
+              >จำนวนเงิน (บาท)
+              <input id="sl-amt" inputmode="decimal" placeholder="0" />
+            </label>
+            <label
+              >หมายเหตุ
+              <input
+                id="sl-note"
+                maxlength="200"
+                placeholder="เช่น ค่าล้างแอร์ช่างสมชาย"
+              />
+            </label>
+          </details>
+          <div class="err" id="sl-err" role="alert"></div>
+          <button class="pri" id="sl-save" style="width: 100%" disabled>
+            บันทึกสลีป
+          </button>
+        </div>
+        <h3>ประวัติสลีป <span class="mu" id="sl-sum"></span></h3>
+        <div class="form" id="sl-list"><div class="mu">กำลังโหลด...</div></div>
+      </div>
+    </div>
+    <div class="ov" id="ct" role="dialog" aria-modal="true">
+      <div class="sheet" style="text-align: center">
+        <div class="sh">
+          <div style="font-size: 20px; font-weight: 700">
+            💬 ติดต่อผู้พัฒนาระบบ
+          </div>
+          <button data-ctx aria-label="ปิด">✕</button>
+        </div>
+        <div
+          style="
+            background: #fff;
+            border: 1px solid var(--bd);
+            border-radius: 14px;
+            padding: 12px;
+            width: 220px;
+            margin: 14px auto 0;
+          "
+        >
+          <svg
+            role="img"
+            aria-label="QR LINE kingkumaallday"
+            style="width: 100%; height: auto; display: block"
+            viewBox="0 0 165 165"
+            class="segno"
+          >
+            <g transform="scale(5)">
+              <path fill="#fff" d="M0 0h33v33h-33z" />
+              <path
+                class="qrline"
+                stroke="#000"
+                d="M2 2.5h7m8 0h1m1 0h4m1 0h7m-29 1h1m5 0h1m3 0h1m1 0h1m2 0h4m3 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h2m2 0h1m2 0h1m6 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h4m4 0h2m4 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m3 0h2m2 0h3m1 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m1 0h1m1 0h1m2 0h4m1 0h1m1 0h1m1 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h1m4 0h1m1 0h1m3 0h2m-21 1h1m1 0h5m3 0h2m2 0h2m1 0h1m1 0h1m2 0h5m-27 1h3m1 0h1m4 0h1m2 0h1m3 0h4m1 0h2m1 0h1m3 0h1m-29 1h2m2 0h5m1 0h2m3 0h1m1 0h1m4 0h3m-23 1h3m3 0h1m1 0h3m1 0h3m1 0h1m2 0h5m1 0h1m-25 1h1m2 0h4m2 0h1m2 0h1m1 0h1m2 0h1m4 0h2m-23 1h2m2 0h1m1 0h1m1 0h3m1 0h1m1 0h7m3 0h1m-28 1h2m3 0h2m1 0h2m1 0h4m1 0h1m2 0h1m1 0h1m2 0h2m-27 1h3m2 0h1m3 0h1m2 0h2m1 0h2m2 0h2m2 0h1m3 0h1m-27 1h3m2 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m5 0h2m-27 1h3m2 0h1m1 0h3m2 0h1m3 0h4m1 0h4m1 0h1m1 0h1m-29 1h1m1 0h1m1 0h1m1 0h1m1 0h1m2 0h1m3 0h1m1 0h2m1 0h1m2 0h2m1 0h1m-27 1h1m2 0h3m2 0h1m2 0h2m1 0h3m10 0h1m-28 1h1m2 0h1m1 0h4m2 0h1m5 0h1m1 0h6m1 0h3m-21 1h1m1 0h5m1 0h1m3 0h1m3 0h5m-29 1h7m2 0h2m1 0h5m2 0h2m1 0h1m1 0h3m-27 1h1m5 0h1m1 0h1m1 0h4m1 0h1m3 0h2m3 0h1m2 0h1m-28 1h1m1 0h3m1 0h1m1 0h2m2 0h1m1 0h2m1 0h1m2 0h5m1 0h1m-27 1h1m1 0h3m1 0h1m1 0h2m2 0h2m2 0h3m2 0h1m3 0h4m-29 1h1m1 0h3m1 0h1m1 0h1m2 0h1m3 0h2m2 0h1m1 0h7m-28 1h1m5 0h1m2 0h1m1 0h5m3 0h2m1 0h1m1 0h2m1 0h1m-28 1h7m1 0h4m1 0h1m1 0h1m1 0h1m1 0h1m2 0h2m2 0h1"
+              />
+            </g>
+          </svg>
+        </div>
+        <div style="font-weight: 700; font-size: 18px; margin-top: 12px">
+          Line Support
+        </div>
+        <div style="color: var(--pri); font-weight: 600">kingkumaallday</div>
+        <a
+          class="pri"
+          style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 18px;
+            border-radius: 12px;
+            background: #06c755;
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 14px;
+          "
+          href="https://line.me/R/ti/p/%40kingkumaallday"
+          target="_blank"
+          rel="noopener"
+          >เพิ่มเพื่อน LINE</a
+        >
+        <div style="margin-top: 10px">
+          <button type="button" data-ctcopy>📋 คัดลอก LINE ID</button>
+        </div>
+        <div class="mu" style="margin-top: 8px">
+          เปิดลิงก์ไม่ได้? ค้นหา <b>kingkumaallday</b> ในแอป LINE ได้เลย
+        </div>
+      </div>
+    </div>
+    <input type="file" accept="image/*" id="f-cover" hidden />
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+      const KEY = <?!= JSON.stringify(key).replace(/</g, "\\u003c") ?>;
+      const SC = {"ปกติ":"var(--ok)","เย็นน้อย":"var(--warn)","เสีย":"var(--bad)","รอซ่อม":"var(--org)","รอช่างนัด":"var(--blue)"};
+      const ACT = {wash:["🧼","ล้างแล้ว"],issue:["⚠️","แจ้งปัญหา"],fix:["🔧","ซ่อมเสร็จ"],status:["🔄","เปลี่ยนสถานะ"]};
+      // รูปที่แนบได้ในแต่ละฟอร์ม [kind, ป้าย]
+      const PH = {wash:[["before","📷 รูปก่อนล้าง"],["after","📷 รูปหลังล้าง"]],issue:[["issue","📷 รูปอาการ"]],fix:[["after","📷 รูปหลังซ่อม"]]};
+      const TYPE_ICON = {"ล้างแอร์":"🧼","ซ่อม":"🔧","แจ้งปัญหา":"⚠️"};
+      let D=null, F="all", cur=null, act=null, tt, P={}, U={}, force=false, saving=false;
+      const $=id=>document.getElementById(id);
+      const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+      const baht=n=>Number(n||0).toLocaleString("th-TH");
+      const today=()=>{const d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)};
+      const col=a=>SC[a.status]||"#9aa4b2";
+      const due=a=>a.alert==="เลยกำหนด"||a.alert==="ใกล้ถึงกำหนด";
+      const bad=a=>a.status&&a.status!=="ปกติ";
+      const okUrl=u=>/^https:\/\/raw\.githubusercontent\.com\//.test(u);
+      const coverUrl = a => D.imgBase + "assets/" + encodeURIComponent(a.id) + ".jpg?v=" + ((D.imgv && D.imgv[a.id]) || 2);
+
+      function call(fn,...args){
+        return new Promise((ok,no)=>google.script.run.withSuccessHandler(ok)
+          .withFailureHandler(e=>no(new Error(String((e&&e.message)||e).replace(/^(Error|Exception):\s*/,""))))[fn](KEY,...args));
+      }
+      function toast(m,b){const t=$("toast");t.textContent=m;t.className="toast on"+(b?" bad":"");clearTimeout(tt);tt=setTimeout(()=>t.className="toast",2800)}
+      function dayTxt(a){if(a.days==null)return a.next||"ยังไม่มีนัด";return a.next+" ("+(a.days<0?"เลย "+(-a.days)+" วัน":a.days===0?"วันนี้":"อีก "+a.days+" วัน")+")"}
+      function sinceTxt(w){return w?w.last+" ("+(w.since===0?"วันนี้":w.since+" วันที่แล้ว")+")":"ยังไม่เคยบันทึกล้าง"}
+
+      // ย่อรูปในเครื่องก่อนอัปโหลด (กว้างสุด 1280px, JPEG) — ประหยัดเน็ต/โควต้า และเร็วขึ้นมาก
+      function shrink(file,max,q){return new Promise((ok,no)=>{
+        const img=new Image(),u=URL.createObjectURL(file);
+        img.onload=()=>{let w=img.naturalWidth,h=img.naturalHeight;const s=Math.min(1,max/Math.max(w,h));w=Math.round(w*s);h=Math.round(h*s);
+          const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);URL.revokeObjectURL(u);ok(c.toDataURL("image/jpeg",q))};
+        img.onerror=()=>{URL.revokeObjectURL(u);no(new Error("อ่านรูปไม่ได้ ลองถ่ายหรือเลือกรูปใหม่"))};
+        img.src=u})}
+
+      function load(){
+        $("upd").textContent="กำลังโหลด...";
+        call("apiMobile").then(d=>{D=d;render();if(cur)openSheet(cur,true)}).catch(e=>{$("upd").textContent="โหลดไม่สำเร็จ";$("list").innerHTML='<div class="empty">'+esc(e.message)+'<br><br><button onclick="load()">ลองใหม่</button></div>'});
+      }
+
+      function render(){
+        $("upd").textContent="อัปเดต "+D.updated+" · "+D.airs.length+" เครื่อง";
+        const never=a=>!a.w;
+        const n={all:D.airs.length,due:D.airs.filter(due).length,bad:D.airs.filter(bad).length,never:D.airs.filter(never).length};
+        const fs=[["all","ทั้งหมด"],["due","ถึงรอบล้าง"],["bad","มีปัญหา"],["never","ยังไม่เคยล้าง"]];
+        $("chips").innerHTML=fs.map(f=>'<button class="chip '+(F===f[0]?"on":"")+'" data-f="'+f[0]+'">'+f[1]+'<b>'+n[f[0]]+'</b></button>').join("");
+        const ok6=D.airs.filter(a=>a.w&&a.w.since<=183).length;
+        $("sum").innerHTML='<div class="sum"><div><b style="color:var(--ok)">'+ok6+'</b><span>ล้างใน 6 เดือน</span></div><div><b style="color:'+(n.due?"var(--org)":"inherit")+'">'+n.due+'</b><span>ถึงรอบล้าง</span></div><div><b style="color:'+(n.never?"var(--warn)":"inherit")+'">'+n.never+'</b><span>ยังไม่เคยล้าง</span></div></div>';
+        $("warn").innerHTML=(D.pending.length?'<div class="alertbar">⏳ ค้างซ่อมนาน: '+D.pending.map(p=>esc(p.id)+(p.days==null?"":" ("+p.days+" วัน)")).join(", ")+'</div>':"")+
+          (D.gh?"":'<div class="alertbar info">📷 ยังไม่ได้ตั้ง GITHUB_TOKEN — ถ่ายรูปแนบประวัติยังไม่ได้ (ดูวิธีตั้งค่าในคู่มือ)</div>');
+        const q=$("q").value.trim().toLowerCase();
+        const L=D.airs.filter(a=>(F==="all"||(F==="due"?due(a):F==="bad"?bad(a):never(a)))&&(!q||(a.id+" "+a.loc+" "+a.model).toLowerCase().includes(q)));
+        $("list").innerHTML=L.length?L.map(a=>'<button class="ac" style="--c:'+col(a)+'" data-id="'+esc(a.id)+'"><span class="tb">❄️<img loading="lazy" alt="" src="'+esc(coverUrl(a))+'"></span><div class="m"><div><span class="id">'+esc(a.id)+'</span> <span class="pill">'+esc(a.status||"ไม่ระบุ")+'</span></div><div class="loc">'+esc(a.loc)+'</div><div class="mu">ล้างล่าสุด: '+esc(sinceTxt(a.w))+'</div><div class="mu">นัดถัดไป: '+esc(dayTxt(a))+'</div></div><span aria-hidden="true">›</span></button>').join(""):'<div class="empty">ไม่พบเครื่อง</div>';
+      }
+
+      function thumbs(urls){
+        const u=(urls||[]).filter(okUrl);
+        return u.length?'<div class="ths">'+u.map(x=>'<button class="tb" data-zoom="'+esc(x)+'" aria-label="ดูรูป">📷<img loading="lazy" alt="" src="'+esc(x)+'"></button>').join("")+'</div>':"";
+      }
+
+      function openSheet(id,keep){
+        cur=id;if(!keep){act=null;P={};U={};force=false}
+        const a=D.airs.filter(x=>x.id===id)[0];
+        if(!a){closeSheet();return}
+        const hist=D.logs.filter(l=>l.id===id).slice(0,15);
+        const w=a.w;
+        $("sheet").innerHTML=
+         '<div class="sh"><div><div style="font-size:20px;font-weight:700">'+esc(a.id)+' <span class="pill" style="--c:'+col(a)+'">'+esc(a.status||"ไม่ระบุ")+'</span></div>'+
+         '<div>'+esc(a.loc)+'</div><div class="mu">'+esc(a.model)+(a.btu?" · "+baht(a.btu)+" BTU":"")+'</div></div><button data-close aria-label="ปิด">✕</button></div>'+
+         '<div class="cover">❄️<img alt="รูปเครื่อง" src="'+esc(coverUrl(a))+'" data-zoom="'+esc(coverUrl(a))+'">'+(D.gh?'<button class="cb" data-cover>📷 เปลี่ยนรูปเครื่อง</button>':"")+'</div>'+
+         '<div class="mu">ล้างล่าสุด '+esc(sinceTxt(w))+'<br>นัดถัดไป '+esc(dayTxt(a))+'</div>'+
+         '<div class="stats"><div><b>'+(w?w.n:0)+'</b>ล้างแล้ว (ครั้ง)</div><div><b>'+(w&&w.avg!=null?w.avg:"–")+'</b>เฉลี่ยทุก (วัน)</div><div><b>'+baht(w?w.cost:0)+'</b>ค่าล้างรวม ฿</div></div>'+
+         '<div class="acts">'+Object.keys(ACT).map(k=>'<button data-act="'+k+'" '+(act===k?'class="pri"':"")+'>'+ACT[k][0]+" "+ACT[k][1]+'</button>').join("")+'</div>'+
+         (act?formHtml(act,a):"")+
+         '<h3>ประวัติล่าสุด</h3><div class="form">'+(hist.length?hist.map(l=>'<div class="h"><div class="hd"><div><b>'+(TYPE_ICON[l.type]||"📝")+" "+esc(l.type)+'</b> <span class="mu">'+esc(l.date)+'</span></div><button data-del="'+l.row+'" data-t="'+esc(l.type)+'" data-d="'+esc(l.date)+'" aria-label="ลบบันทึกนี้">🗑</button></div>'+(l.detail?'<div>'+esc(l.detail)+'</div>':"")+'<div class="mu">'+(l.tech?"👷 "+esc(l.tech):"")+(l.tech&&l.cost?" · ":"")+(l.cost?baht(l.cost)+" บาท":"")+'</div>'+thumbs(l.photos)+'</div>').join(""):'<div class="mu">ยังไม่มีประวัติ</div>')+'</div>'+
+         '<p class="mu" style="margin-top:14px">แก้ข้อมูลเครื่อง (ตำแหน่ง/รุ่น/BTU) ได้ที่ <a href="<?= base ?>?v=classic">แดชบอร์ดเต็ม</a></p>';
+        $("ov").classList.add("on");document.body.style.overflow="hidden";
+      }
+
+      function pickHtml(k){
+        const ps=PH[k];if(!ps)return"";
+        if(!D.gh)return'<div class="mu" style="margin-top:8px">📷 ยังแนบรูปไม่ได้ (ยังไม่ตั้ง GITHUB_TOKEN)</div>';
+        return'<div class="pk '+(ps.length===1?"one":"")+'">'+ps.map(p=>'<label class="pb" id="pb-'+p[0]+'">'+(P[p[0]]?'<img alt="" src="'+P[p[0]]+'"><button type="button" class="rm" data-rm="'+p[0]+'">✕ เอาออก</button>':'<span>'+p[1]+'<br><small>แตะเพื่อถ่าย/เลือกรูป</small></span>')+'<input type="file" accept="image/*" data-photo="'+p[0]+'"></label>').join("")+'</div>';
+      }
+
+      function formHtml(k,a){
+        const dt='<label>วันที่<input type="date" id="f-date" value="'+today()+'"></label>';
+        const tech='<label>ช่าง<input id="f-tech" list="tl" placeholder="พิมพ์หรือเลือกชื่อช่าง" maxlength="80"><datalist id="tl">'+D.techs.map(t=>'<option value="'+esc(t)+'">').join("")+'</datalist></label>';
+        const cost='<label>ค่าใช้จ่าย (บาท)<input id="f-cost" inputmode="decimal" placeholder="0"></label>';
+        const det=(ph,req)=>'<label>หมายเหตุ'+(req?" *":"")+'<textarea id="f-detail" rows="2" maxlength="200" placeholder="'+ph+'"></textarea></label>';
+        const note=t=>'<div class="mu" style="margin-top:6px">'+t+'</div>';
+        let body="";
+        if(k==="wash")body=dt+'<div class="row2">'+tech+cost+'</div>'+det("เช่น ล้างใหญ่ เปลี่ยนแคป โน้ตเพิ่มเติม")+pickHtml(k)+note("ระบบนัดครั้งถัดไป +6 เดือน และตั้งสถานะ ปกติ");
+        if(k==="issue")body=dt+det("เช่น เย็นน้อย มีน้ำหยด หรือโน้ตปัญหาที่พบ",true)+pickHtml(k)+note("สถานะจะเปลี่ยนเป็น รอซ่อม");
+        if(k==="fix")body=dt+'<div class="row2">'+tech+cost+'</div>'+det("เช่น เติมน้ำยา เปลี่ยนคาปา โน้ตเพิ่มเติม")+pickHtml(k)+note("สถานะจะเปลี่ยนเป็น ปกติ");
+        if(k==="status")body='<label>สถานะใหม่<select id="f-status">'+D.statuses.map(s=>'<option '+(s===a.status?"selected":"")+'>'+esc(s)+'</option>').join("")+'</select></label>';
+        return '<div class="form"><b>'+ACT[k][0]+" "+ACT[k][1]+" "+esc(a.id)+'</b>'+body+'<div class="err" id="f-err" role="alert"></div><button class="pri" id="f-save" style="width:100%">บันทึก'+ACT[k][1]+'</button></div>';
+      }
+
+      function closeSheet(){cur=null;act=null;P={};U={};force=false;$("ov").classList.remove("on");document.body.style.overflow=""}
+      function v(id){const e=$(id);return e?e.value:""}
+
+      async function save(btn){
+        if(saving)return;saving=true;
+        const k=act,label="บันทึก"+ACT[k][1];
+        btn.disabled=true;$("f-err").textContent="";
+        try{
+          const urls=[];
+          for(const p of (PH[k]||[])){
+            const kd=p[0];if(!P[kd])continue;
+            if(!U[kd]){btn.textContent="อัปโหลดรูป "+(urls.length+1)+"...";U[kd]=(await call("apiPhotoUpload",{id:cur,kind:kd,data:P[kd]})).url}
+            urls.push(U[kd]);
+          }
+          btn.textContent="กำลังบันทึก...";
+          const d=await call("apiAction",{id:cur,type:k,date:v("f-date"),tech:v("f-tech"),cost:v("f-cost"),detail:v("f-detail"),status:v("f-status"),photos:urls,force:force});
+          D=d;act=null;P={};U={};force=false;render();openSheet(cur,true);toast(label+"แล้ว ✓");
+        }catch(e){
+          let m=e.message;
+          if(m.indexOf("[DUP]")===0){force=true;m=m.slice(5)}
+          $("f-err").textContent=m;btn.disabled=false;btn.textContent=label;
+        }finally{saving=false}
+      }
+
+      async function onPhoto(inp){
+        const kd=inp.dataset.photo,f=inp.files&&inp.files[0];if(!f)return;
+        try{P[kd]=await shrink(f,1280,.72);delete U[kd];
+          const box=$("pb-"+kd);box.innerHTML='<img alt="" src="'+P[kd]+'"><button type="button" class="rm" data-rm="'+kd+'">✕ เอาออก</button><input type="file" accept="image/*" data-photo="'+kd+'">';
+        }catch(e){toast(e.message,true)}
+      }
+
+      async function onCover(inp){
+        const f=inp.files&&inp.files[0];inp.value="";if(!f||!cur)return;
+        toast("กำลังอัปโหลดรูปเครื่อง...");
+        try{
+          const data=await shrink(f,1280,.78);
+          const r=await call("apiPhotoUpload",{id:cur,kind:"cover",data:data});
+          D.imgv=D.imgv||{};
+          D.imgv[cur]=r.ver;
+
+          // ลบ class ที่สั่งซ่อนรูปออก เพื่อให้แสดงรูปใหม่
+          const imgEl = document.querySelector(".cover img");
+          if(imgEl) imgEl.classList.remove("x");
+
+          render();
+          openSheet(cur,true);
+          toast("เปลี่ยนรูปเครื่องแล้ว ✓");
+        }catch(e){toast(e.message,true)}
+      }
+
+      function armDel(btn){
+        if(btn.dataset.armed){clearTimeout(+btn.dataset.armed);delete btn.dataset.armed;
+          btn.disabled=true;
+          call("apiLogDelete",{row:btn.dataset.del,id:cur,type:btn.dataset.t,date:btn.dataset.d})
+            .then(d=>{D=d;render();openSheet(cur,true);toast("ลบบันทึกแล้ว (สถานะเครื่องไม่เปลี่ยน)")})
+            .catch(e=>{toast(e.message,true);btn.disabled=false;btn.textContent="🗑"});
+          return}
+        btn.textContent="ลบ? กดอีกครั้ง";
+        btn.dataset.armed=setTimeout(()=>{delete btn.dataset.armed;btn.textContent="🗑"},3500);
+      }
+
+      document.addEventListener("click",ev=>{
+        const t=ev.target;
+        if(t.id==="ov"){closeSheet();return}
+        if(t.id==="lb"||t.hasAttribute("data-lbx")){$("lb").classList.remove("on");return}
+        const el=t.closest("[data-f],[data-id],[data-act],[data-close],[data-zoom],[data-cover],[data-del],[data-rm],#f-save");
+        if(!el)return;
+        if(el.dataset.rm){ev.preventDefault();const kd=el.dataset.rm;delete P[kd];delete U[kd];
+          const p=(PH[act]||[]).filter(x=>x[0]===kd)[0];
+          $("pb-"+kd).innerHTML='<span>'+(p?p[1]:"📷")+'<br><small>แตะเพื่อถ่าย/เลือกรูป</small></span><input type="file" accept="image/*" data-photo="'+kd+'">';return}
+        if(el.dataset.zoom){$("lbi").src=el.dataset.zoom;$("lb").classList.add("on")}
+        else if(el.hasAttribute("data-cover"))$("f-cover").click();
+        else if(el.dataset.del)armDel(el);
+        else if(el.dataset.f){F=el.dataset.f;render()}
+        else if(el.dataset.id)openSheet(el.dataset.id)
+        else if(el.dataset.act){act=act===el.dataset.act?null:el.dataset.act;P={};U={};force=false;openSheet(cur,true)}
+        else if(el.hasAttribute("data-close"))closeSheet()
+        else if(el.id==="f-save")save(el);
+      });
+      document.addEventListener("change",ev=>{if(ev.target.dataset&&ev.target.dataset.photo)onPhoto(ev.target);else if(ev.target.id==="f-cover")onCover(ev.target)});
+      document.addEventListener("error",e=>{if(e.target&&e.target.tagName==="IMG")e.target.classList.add("x")},true);
+      document.addEventListener("keydown",e=>{if(e.key==="Escape"){$("lb").classList.remove("on");closeSheet()}});
+      /* ===================== สลีปโอนเงิน ===================== */
+      const SL={img:null,rows:[],busy:false};
+      const SL_EMPTY='<span>📷 แตะเพื่อถ่าย/เลือกรูปสลีป<br><small>ไม่ต้องกรอกอะไรเพิ่ม</small></span><input type="file" accept="image/*" id="sl-file">';
+      function slOpen(){
+        if(D&&!D.gh){toast("ยังไม่ได้ตั้ง GITHUB_TOKEN — อัปโหลดสลีปไม่ได้",true);return}
+        $("sl-id").innerHTML='<option value="">— ไม่ระบุ —</option>'+(D?D.airs.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.id)+" · "+esc(a.loc)+'</option>').join(""):"");
+        slReset();
+        $("sl").classList.add("on");document.body.style.overflow="hidden";
+        slLoad();
+      }
+      function slClose(){$("sl").classList.remove("on");if(!cur)document.body.style.overflow=""}
+      function slReset(){SL.img=null;$("sl-pb").innerHTML=SL_EMPTY;$("sl-amt").value="";$("sl-note").value="";$("sl-id").value="";$("sl-err").textContent="";$("sl-save").disabled=true;$("sl-save").textContent="บันทึกสลีป"}
+      function slLoad(){
+        $("sl-list").innerHTML='<div class="mu">กำลังโหลด...</div>';
+        call("apiSlipList").then(r=>{SL.rows=r.slips;slRender(r)}).catch(e=>{$("sl-list").innerHTML='<div class="err">'+esc(e.message)+' <button onclick="slLoad()">ลองใหม่</button></div>'});
+      }
+      function slRender(r){
+        $("sl-sum").textContent=r.count?"· "+r.count+" ใบ"+(r.total?" · รวม "+baht(r.total)+" ฿":""):"";
+        $("sl-list").innerHTML=r.slips.length?r.slips.map(s=>'<div class="h"><div class="hd"><div><b>'+esc(s.time)+'</b>'+(s.id&&s.id!=="-"?' <span class="mu">· '+esc(s.id)+'</span>':"")+(s.amount?' <b>· '+baht(s.amount)+' ฿</b>':"")+'</div><button data-sldel="'+s.row+'" data-slurl="'+esc(s.url)+'" aria-label="ลบสลีปนี้">🗑</button></div>'+(s.note?'<div>'+esc(s.note)+'</div>':"")+'<div class="mu">'+(s.by?"👤 "+esc(s.by):"")+'</div>'+(okUrl(s.url)?'<div class="ths"><button class="tb" data-zoom="'+esc(s.url)+'" aria-label="ดูสลีป">🧾<img loading="lazy" alt="" src="'+esc(s.url)+'"></button></div>':"")+'</div>').join(""):'<div class="mu">ยังไม่มีสลีป</div>';
+      }
+      async function slSave(btn){
+        if(SL.busy||!SL.img)return;SL.busy=true;
+        btn.disabled=true;btn.textContent="กำลังอัปโหลด...";$("sl-err").textContent="";
+        try{
+          const r=await call("apiSlipSave",{data:SL.img,id:v("sl-id"),amount:v("sl-amt"),note:v("sl-note")});
+          SL.rows=r.slips;slRender(r);slReset();toast("บันทึกสลีปแล้ว ✓");
+        }catch(e){$("sl-err").textContent=e.message;btn.disabled=false;btn.textContent="บันทึกสลีป"}
+        finally{SL.busy=false}
+      }
+      function slDel(btn){
+        if(btn.dataset.armed){clearTimeout(+btn.dataset.armed);delete btn.dataset.armed;btn.disabled=true;
+          call("apiSlipDelete",{row:btn.dataset.sldel,url:btn.dataset.slurl})
+            .then(r=>{SL.rows=r.slips;slRender(r);toast("ลบรายการแล้ว")})
+            .catch(e=>{toast(e.message,true);btn.disabled=false;btn.textContent="🗑"});return}
+        btn.textContent="ลบ? กดอีกครั้ง";
+        btn.dataset.armed=setTimeout(()=>{delete btn.dataset.armed;btn.textContent="🗑"},3500);
+      }
+      document.addEventListener("click",ev=>{
+        const t=ev.target;
+        if(t.id==="sl"){slClose();return}
+        const el=t.closest("[data-slopen],[data-slx],[data-slrm],[data-sldel],#sl-save");
+        if(!el)return;
+        if(el.hasAttribute("data-slopen"))slOpen();
+        else if(el.hasAttribute("data-slx"))slClose();
+        else if(el.hasAttribute("data-slrm")){ev.preventDefault();SL.img=null;$("sl-pb").innerHTML=SL_EMPTY;$("sl-save").disabled=true}
+        else if(el.dataset.sldel)slDel(el);
+        else if(el.id==="sl-save")slSave(el);
+      });
+      document.addEventListener("change",async ev=>{
+        if(ev.target.id!=="sl-file")return;
+        const f=ev.target.files&&ev.target.files[0];if(!f)return;
+        try{
+          SL.img=await shrink(f,1600,.8);
+          $("sl-pb").innerHTML='<img alt="สลีป" src="'+SL.img+'"><button type="button" class="rm" data-slrm>✕ เอาออก</button><input type="file" accept="image/*" id="sl-file">';
+          $("sl-save").disabled=false;$("sl-err").textContent="";
+        }catch(e){toast(e.message,true)}
+      });
+      document.addEventListener("keydown",e=>{if(e.key==="Escape")slClose()});
+      document.addEventListener("click",ev=>{
+        const t=ev.target;
+        if(t.id==="ct"||t.closest("[data-ctx]")){$("ct").classList.remove("on");return}
+        if(t.closest("[data-ctopen]"))$("ct").classList.add("on");
+        if(t.closest("[data-ctcopy]")){
+          const ok=()=>toast("คัดลอก kingkumaallday แล้ว ✓");
+          const fb=()=>{const x=document.createElement("textarea");x.value="kingkumaallday";document.body.appendChild(x);x.select();try{document.execCommand("copy");ok()}catch(e){toast("คัดลอกไม่ได้ พิมพ์ค้นหา kingkumaallday ใน LINE",true)}x.remove()};
+          if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText("kingkumaallday").then(ok,fb);else fb();
+        }
+      });
+      document.addEventListener("keydown",e=>{if(e.key==="Escape")$("ct").classList.remove("on")});
+      $("q").oninput=()=>{if(D)render()};
+      $("rf").onclick=load;
+      load();
+      setInterval(()=>{if(!cur&&!document.hidden)load()},300000);
+    </script>
+  </body>
+</html>
