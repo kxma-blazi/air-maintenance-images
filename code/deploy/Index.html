@@ -1,0 +1,5517 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ec4899" />
+    <title>BTT Field Tool - ระบบจัดการเครื่องมืออัจฉริยะ</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- FontAwesome 6 -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Google Fonts Prompt -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Html5-Qrcode Library สำหรับสแกนกล้อง -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+    <style>
+      :root {
+        --btt: #ec4899;
+        --btt-d: #db2777;
+        --btt-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+        --btt-glow: 0 0 20px rgba(236, 72, 153, 0.35);
+        --bg-light: #f1f5f9;
+        --bg-dark: #07090e;
+        --card-light: rgba(255, 255, 255, 0.85);
+        --card-dark: rgba(15, 23, 42, 0.85);
+        --text-light: #0f172a;
+        --text-dark: #f8fafc;
+        --border-light: rgba(226, 232, 240, 0.8);
+        --border-dark: rgba(51, 65, 85, 0.6);
+      }
+
+      * {
+        font-family: 'Prompt', sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-light);
+        color: var(--text-light);
+        transition: background-color 0.4s ease, color 0.4s ease;
+        letter-spacing: 0.01em;
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(236, 72, 153, 0.03) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(139, 92, 246, 0.03) 0%,
+            transparent 40%
+          );
+        background-attachment: fixed;
+      }
+
+      body.dark-mode {
+        background-color: var(--bg-dark);
+        color: var(--text-dark);
+        background-image: radial-gradient(
+            circle at 10% 20%,
+            rgba(236, 72, 153, 0.08) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(139, 92, 246, 0.08) 0%,
+            transparent 40%
+          );
+      }
+
+      /* Ultra Glassmorphism & Card Design */
+      .card {
+        border-radius: 20px;
+        border: 1px solid var(--border-light);
+        background: var(--card-light);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.06),
+          0 5px 15px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .card:hover {
+        transform: translateY(-4px) scale(1.01);
+        box-shadow: 0 20px 40px -10px rgba(236, 72, 153, 0.18);
+        border-color: rgba(236, 72, 153, 0.3);
+      }
+
+      body.dark-mode .card {
+        background: var(--card-dark);
+        border-color: var(--border-dark);
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4);
+      }
+
+      body.dark-mode .card:hover {
+        box-shadow: 0 20px 40px -10px rgba(236, 72, 153, 0.25);
+        border-color: rgba(236, 72, 153, 0.4);
+      }
+
+      /* Table Styling */
+      .table-container {
+        background: var(--card-light);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+        padding: 24px;
+        border: 1px solid var(--border-light);
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.06);
+        transition: all 0.4s ease;
+      }
+
+      body.dark-mode .table-container {
+        background: var(--card-dark);
+        border-color: var(--border-dark);
+      }
+
+      .table {
+        color: var(--text-light);
+        vertical-align: middle;
+      }
+
+      body.dark-mode .table {
+        color: var(--text-dark);
+        --bs-table-bg: transparent;
+        --bs-table-hover-bg: rgba(236, 72, 153, 0.08);
+        --bs-table-border-color: #1e293b;
+      }
+
+      .table thead th {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        border-bottom-width: 2px;
+        background: #f8fafc;
+      }
+
+      body.dark-mode .table thead th {
+        background: #111827 !important;
+        color: #94a3b8 !important;
+        border-bottom-color: #374151;
+      }
+
+      .table-responsive {
+        max-height: 70vh;
+        border-radius: 14px;
+      }
+
+      .table-responsive thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+
+      /* Buttons & Badges อลังการ */
+      .btn {
+        border-radius: 14px;
+        font-weight: 500;
+        padding: 0.55rem 1.1rem;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .btn-btt {
+        background: var(--btt-gradient);
+        color: #fff;
+        border: none;
+        box-shadow: 0 4px 20px rgba(236, 72, 153, 0.4);
+      }
+
+      .btn-btt:hover {
+        opacity: 0.95;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(236, 72, 153, 0.6);
+      }
+
+      .badge {
+        font-weight: 500;
+        padding: 0.5em 0.85em;
+        border-radius: 10px;
+        letter-spacing: 0.02em;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .badge-available {
+        background-color: #10b981;
+        color: #fff;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+      }
+      .badge-borrowed {
+        background-color: #f59e0b;
+        color: #fff;
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+      }
+      .badge-repair {
+        background-color: #ef4444;
+        color: #fff;
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+      }
+
+      /* Navigation Pills แบบล้ำๆ */
+      .nav-pills {
+        gap: 8px;
+        padding: 8px;
+        background: var(--card-light);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-light);
+        border-radius: 20px;
+        display: inline-flex;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+      }
+
+      .nav-pills .nav-link {
+        border-radius: 14px;
+        padding: 0.65rem 1.3rem;
+        color: #64748b;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .nav-pills .nav-link.active {
+        background: var(--btt-gradient);
+        color: #fff;
+        box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+      }
+
+      body.dark-mode .nav-pills {
+        background: var(--card-dark);
+        border-color: var(--border-dark);
+      }
+
+      body.dark-mode .nav-pills .nav-link:not(.active) {
+        color: #94a3b8;
+      }
+
+      body.dark-mode .nav-pills .nav-link:not(.active):hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+      }
+
+      /* Form Controls สวยเนียน */
+      .form-control,
+      .form-select {
+        border-radius: 14px;
+        padding: 0.7rem 1.1rem;
+        border: 1px solid var(--border-light);
+        background-color: rgba(255, 255, 255, 0.8);
+        color: var(--text-light);
+        transition: all 0.25s ease;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        border-color: var(--btt);
+        box-shadow: 0 0 0 0.3rem rgba(236, 72, 153, 0.22);
+        background-color: #fff;
+      }
+
+      body.dark-mode .form-control,
+      body.dark-mode .form-select {
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: #334155;
+        color: var(--text-dark);
+      }
+
+      body.dark-mode .form-control:focus,
+      body.dark-mode .form-select:focus {
+        background-color: rgba(15, 23, 42, 0.9);
+        border-color: var(--btt);
+        box-shadow: 0 0 0 0.3rem rgba(236, 72, 153, 0.3);
+      }
+
+      /* Thumbnails & Images */
+      .asset-img {
+        width: 54px;
+        height: 54px;
+        object-fit: cover;
+        border-radius: 12px;
+        cursor: pointer;
+        border: 2px solid var(--border-light);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .asset-img:hover {
+        transform: scale(1.15) rotate(2deg);
+        border-color: var(--btt);
+        box-shadow: 0 8px 20px rgba(236, 72, 153, 0.4);
+      }
+
+      .qr-thumb {
+        width: 44px;
+        height: 44px;
+        cursor: pointer;
+        object-fit: cover;
+        border-radius: 10px;
+        background: #fff;
+        padding: 3px;
+        border: 1px solid var(--border-light);
+        transition: transform 0.2s;
+      }
+
+      .qr-thumb:hover {
+        transform: scale(1.1);
+      }
+
+      /* Modals */
+      .modal-content {
+        border: none;
+        border-radius: 24px;
+        background: var(--card-light);
+        backdrop-filter: blur(20px);
+        color: var(--text-light);
+        box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.3);
+      }
+
+      body.dark-mode .modal-content {
+        background: #0f172a;
+        color: var(--text-dark);
+        border: 1px solid rgba(51, 65, 85, 0.8);
+      }
+
+      body.dark-mode .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+      }
+
+      /* Floating LINE Contact Button อลังการ */
+      .ct-fab {
+        position: fixed;
+        right: 28px;
+        bottom: 28px;
+        z-index: 1030;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 22px;
+        border: none;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #06c755 0%, #05963f 100%);
+        color: #fff;
+        font-weight: 600;
+        box-shadow: 0 10px 30px rgba(6, 199, 85, 0.5);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .ct-fab:hover {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 15px 35px rgba(6, 199, 85, 0.7);
+      }
+
+      .ct-card {
+        border: none;
+        border-radius: 24px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .ct-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 2;
+        filter: invert(1);
+      }
+
+      .ct-hero {
+        background: var(--btt-gradient);
+        color: #fff;
+        text-align: center;
+        padding: 36px 20px 28px;
+      }
+
+      .ct-avatar {
+        width: 76px;
+        height: 76px;
+        margin: 0 auto 14px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .ct-name {
+        font-weight: 700;
+        font-size: 1.25rem;
+      }
+      .ct-title {
+        opacity: 0.95;
+        font-size: 0.92rem;
+      }
+      .ct-note {
+        opacity: 0.85;
+        font-size: 0.85rem;
+        margin-top: 4px;
+      }
+      .ct-qrwrap {
+        text-align: center;
+        padding: 22px;
+      }
+      .ct-qr img {
+        width: 180px;
+        height: 180px;
+        border-radius: 16px;
+        border: 1px solid #eee;
+        background: #fff;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      }
+      .ct-noqr {
+        color: #64748b;
+        font-size: 0.88rem;
+        padding: 20px;
+      }
+      .ct-scan {
+        margin-top: 10px;
+        color: #06c755;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      .ct-rows {
+        padding: 0 22px 14px;
+      }
+      .ct-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 0;
+        border-top: 1px solid rgba(128, 128, 128, 0.15);
+      }
+      .ct-ico {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .ct-txt {
+        flex: 1;
+        min-width: 0;
+        word-break: break-all;
+      }
+      .ct-txt small {
+        color: #64748b;
+        display: block;
+        font-size: 0.78rem;
+      }
+      .ct-act {
+        display: flex;
+        gap: 6px;
+      }
+      .ct-hours,
+      .ct-empty {
+        text-align: center;
+        color: #64748b;
+        font-size: 0.85rem;
+        padding: 10px 22px 22px;
+      }
+
+      .stat-click {
+        cursor: pointer;
+      }
+      .stat-click.active {
+        outline: 2px solid var(--btt);
+        box-shadow: 0 10px 30px rgba(236, 72, 153, 0.3);
+      }
+
+      /* ========================================================
+         ⭐ ไฮไลต์แถวที่ติ๊กเลือก (Checkbox Checked) แบบอลังการ 
+         ======================================================== */
+
+      /* โหมดมืด (Dark Mode): เรืองแสงสีชมพูหรูหรา ตัวหนังสือสว่างชัดเจน */
+      body.dark-mode .table tbody tr:has(.asset-checkbox:checked) {
+        background: linear-gradient(
+          90deg,
+          rgba(236, 72, 153, 0.22) 0%,
+          rgba(139, 92, 246, 0.12) 100%
+        ) !important;
+        box-shadow: inset 4px 0 0 #ec4899;
+      }
+      body.dark-mode .table tbody tr:has(.asset-checkbox:checked) td,
+      body.dark-mode .table tbody tr:has(.asset-checkbox:checked) td * {
+        color: #ffffff !important;
+        font-weight: 500;
+      }
+      body.dark-mode .table tbody tr:has(.asset-checkbox:checked) td small {
+        color: #f472b6 !important; /* ชมพูสว่างเรืองรอง */
+      }
+
+      /* โหมดสว่าง (Light Mode): ไฮไลต์ด้วยโทนสีชมพูอ่อนพาสเทล ตัดขอบชัดเจน */
+      body:not(.dark-mode) .table tbody tr:has(.asset-checkbox:checked) {
+        background: linear-gradient(
+          90deg,
+          rgba(236, 72, 153, 0.12) 0%,
+          rgba(139, 92, 246, 0.06) 100%
+        ) !important;
+        box-shadow: inset 4px 0 0 #ec4899;
+      }
+      body:not(.dark-mode) .table tbody tr:has(.asset-checkbox:checked) td,
+      body:not(.dark-mode) .table tbody tr:has(.asset-checkbox:checked) td * {
+        color: #831843 !important; /* สีตัวหนังสือเข้มตัดกับไฮไลต์ชัดเจน */
+        font-weight: 600;
+      }
+      body:not(.dark-mode)
+        .table
+        tbody
+        tr:has(.asset-checkbox:checked)
+        td
+        small {
+        color: #9d174d !important;
+      }
+
+      @media (max-width: 576px) {
+        .container-fluid {
+          padding-left: 1rem !important;
+          padding-right: 1rem !important;
+        }
+        .ct-fab {
+          padding: 12px;
+          font-size: 0;
+          gap: 0;
+        }
+        .ct-fab i {
+          font-size: 1.4rem;
+        }
+        .nav-pills {
+          display: flex;
+          overflow-x: auto;
+          flex-wrap: nowrap;
+        }
+        .nav-pills .nav-link {
+          white-space: nowrap;
+        }
+      }
+
+      /* ===== Dark theme: ตัวหนังสืออ่านง่าย (คุมด้วยตัวแปรชุดเดียว) ===== */
+      body.dark-mode {
+        --tx-main: #e5e7eb; /* เนื้อหาหลัก */
+        --tx-head: #f8fafc; /* หัวข้อ / ตัวหนา */
+        --tx-soft: #cbd5e1; /* label, ข้อความรอง */
+        --tx-mute: #a3b1c6; /* คำอธิบาย, small, muted */
+        --tx-ph: #7b8aa3; /* placeholder */
+        --tx-link: #93c5fd;
+        --tx-accent: #f9a8d4; /* ชมพูอ่อนอ่านง่ายบนพื้นมืด */
+        --surface-2: #111827;
+        --line: rgba(148, 163, 184, 0.22);
+      }
+
+      /* โทนตัวหนังสือ 3 ระดับ (เลือกได้จากปุ่มบนหัวเว็บ) */
+      body.dark-mode[data-tone='soft'] {
+        --tx-main: #cbd5e1;
+        --tx-head: #e2e8f0;
+        --tx-soft: #b6c2d4;
+        --tx-mute: #8fa0b8;
+      }
+      body.dark-mode[data-tone='sharp'] {
+        --tx-main: #f8fafc;
+        --tx-head: #ffffff;
+        --tx-soft: #e2e8f0;
+        --tx-mute: #c3cfe0;
+        --tx-ph: #94a3b8;
+      }
+
+      body.dark-mode,
+      body.dark-mode .table,
+      body.dark-mode .modal-content,
+      body.dark-mode .list-group-item,
+      body.dark-mode .dropdown-item,
+      body.dark-mode .form-check-label {
+        color: var(--tx-main);
+      }
+
+      body.dark-mode h1,
+      body.dark-mode h2,
+      body.dark-mode h3,
+      body.dark-mode h4,
+      body.dark-mode h5,
+      body.dark-mode h6,
+      body.dark-mode .fw-bold,
+      body.dark-mode .modal-title {
+        color: var(--tx-head);
+      }
+
+      body.dark-mode .form-label,
+      body.dark-mode .input-group-text {
+        color: var(--tx-soft);
+      }
+
+      body.dark-mode .text-muted,
+      body.dark-mode small,
+      body.dark-mode .small,
+      body.dark-mode .ct-txt small,
+      body.dark-mode .ct-noqr,
+      body.dark-mode .ct-hours,
+      body.dark-mode .ct-empty {
+        color: var(--tx-mute) !important;
+      }
+
+      body.dark-mode .table {
+        --bs-table-color: var(--tx-main);
+        --bs-table-striped-color: var(--tx-main);
+        --bs-table-hover-color: var(--tx-head);
+        --bs-table-border-color: var(--line);
+      }
+      body.dark-mode .table thead th {
+        color: var(--tx-soft) !important;
+        background: var(--surface-2) !important;
+      }
+      body.dark-mode .table td,
+      body.dark-mode .table th {
+        border-color: var(--line);
+      }
+
+      body.dark-mode .form-control,
+      body.dark-mode .form-select {
+        color: var(--tx-head);
+      }
+      body.dark-mode .form-control::placeholder {
+        color: var(--tx-ph);
+        opacity: 1;
+      }
+      body.dark-mode .form-select option {
+        background: #0f172a;
+        color: var(--tx-main);
+      }
+
+      body.dark-mode .list-group-item {
+        background: rgba(15, 23, 42, 0.7);
+        border-color: var(--line);
+      }
+      body.dark-mode .list-group-item-action:hover {
+        background: rgba(236, 72, 153, 0.12);
+        color: var(--tx-head);
+      }
+
+      body.dark-mode .dropdown-menu {
+        background: #0f172a;
+        border-color: var(--line);
+      }
+      body.dark-mode .dropdown-item:hover {
+        background: rgba(236, 72, 153, 0.15);
+        color: var(--tx-head);
+      }
+      body.dark-mode .dropdown-item-text {
+        color: var(--tx-mute);
+      }
+
+      body.dark-mode .nav-pills .nav-link:not(.active) {
+        color: var(--tx-soft) !important;
+      }
+      body.dark-mode a:not(.btn) {
+        color: var(--tx-link);
+      }
+      body.dark-mode .text-pink {
+        color: var(--tx-accent);
+      }
+
+      /* ปุ่ม outline ให้ตัวหนังสืออ่านออกบนพื้นมืด */
+      body.dark-mode .btn-outline-secondary {
+        color: var(--tx-soft);
+        border-color: rgba(148, 163, 184, 0.45);
+      }
+      body.dark-mode .btn-outline-secondary:hover {
+        background: rgba(148, 163, 184, 0.18);
+        color: var(--tx-head);
+      }
+      body.dark-mode .btn-outline-dark {
+        color: var(--tx-soft);
+        border-color: rgba(148, 163, 184, 0.45);
+      }
+      body.dark-mode .btn-outline-dark:hover {
+        background: rgba(148, 163, 184, 0.18);
+        color: var(--tx-head);
+      }
+      body.dark-mode .btn-outline-primary {
+        color: #93c5fd;
+        border-color: #3b82f6;
+      }
+      body.dark-mode .btn-outline-success {
+        color: #6ee7b7;
+        border-color: #10b981;
+      }
+      body.dark-mode .btn-outline-danger {
+        color: #fca5a5;
+        border-color: #ef4444;
+      }
+      body.dark-mode .btn-outline-primary:hover,
+      body.dark-mode .btn-outline-success:hover,
+      body.dark-mode .btn-outline-danger:hover {
+        color: #fff;
+      }
+      body.dark-mode .btn-link.text-danger {
+        color: #fca5a5 !important;
+      }
+
+      /* SweetAlert2 ธีมมืด (ป๊อปอัปเบิก/คืน/ถาม AI/เข้าสู่ระบบ) */
+      body.dark-mode .swal2-popup {
+        background: #0f172a;
+        color: var(--tx-main);
+        border: 1px solid var(--line);
+      }
+      body.dark-mode .swal2-title {
+        color: var(--tx-head);
+      }
+      body.dark-mode .swal2-html-container {
+        color: var(--tx-main);
+      }
+      body.dark-mode .swal2-input,
+      body.dark-mode .swal2-textarea,
+      body.dark-mode .swal2-select {
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--tx-head);
+        border-color: #334155;
+      }
+      body.dark-mode .swal2-input::placeholder,
+      body.dark-mode .swal2-textarea::placeholder {
+        color: var(--tx-ph);
+      }
+      body.dark-mode .swal2-validation-message {
+        background: #1e293b;
+        color: #fca5a5;
+      }
+      body.dark-mode .swal2-close {
+        color: var(--tx-soft);
+      }
+      body.dark-mode .swal2-toast {
+        background: #1e293b !important;
+      }
+      body.dark-mode .swal2-toast .swal2-title {
+        color: var(--tx-head);
+      }
+
+      #assetTable tbody tr {
+        cursor: pointer;
+      }
+      #assetTable tbody tr td {
+        user-select: none;
+      }
+      #assetTable tbody tr:active {
+        filter: brightness(0.97);
+      }
+
+      /* ===== AI Chat (ผู้ช่วยประจำระบบ) ===== */
+      .ai-msgs {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 260px;
+        max-height: 52vh;
+        overflow-y: auto;
+        padding: 4px 2px;
+      }
+      .ai-b {
+        max-width: 90%;
+        padding: 10px 14px;
+        border-radius: 16px;
+        line-height: 1.55;
+        word-break: break-word;
+        font-size: 0.93rem;
+      }
+      .ai-b.u {
+        align-self: flex-end;
+        background: var(--btt-gradient);
+        color: #fff;
+        border-bottom-right-radius: 4px;
+        white-space: pre-wrap;
+      }
+      .ai-b.a {
+        align-self: flex-start;
+        background: rgba(148, 163, 184, 0.16);
+        border-bottom-left-radius: 4px;
+      }
+      .ai-b.a ul {
+        margin: 0.3rem 0 0.3rem 1.1rem;
+        padding: 0;
+      }
+      .ai-b.err {
+        background: rgba(239, 68, 68, 0.14);
+        color: #b91c1c;
+      }
+      body.dark-mode .ai-b.err {
+        color: #fca5a5;
+      }
+      .ai-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .ai-chip {
+        border: 1px solid rgba(236, 72, 153, 0.45);
+        background: transparent;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.82rem;
+        color: inherit;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .ai-chip:hover {
+        background: rgba(236, 72, 153, 0.14);
+      }
+      .ai-typing span {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        margin: 0 2px;
+        border-radius: 50%;
+        background: #94a3b8;
+        animation: aiDot 1s infinite;
+      }
+      .ai-typing span:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .ai-typing span:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      @keyframes aiDot {
+        0%,
+        80%,
+        100% {
+          opacity: 0.25;
+        }
+        40% {
+          opacity: 1;
+        }
+      }
+      #aiInput {
+        resize: none;
+      }
+      @media (min-width: 576px) {
+        .ai-dialog {
+          max-width: 560px;
+        }
+      }
+
+      /* แถบโหลดบางๆ ด้านบน (แทนหน้าจอโหลดเต็มจอตอนรีเฟรชข้อมูล) */
+      #topBar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        width: 0;
+        z-index: 99998;
+        background: var(--btt-gradient);
+        opacity: 0;
+        transition: width 0.6s ease, opacity 0.3s;
+      }
+      #topBar.on {
+        opacity: 1;
+        width: 80%;
+      }
+
+      .code-thumb {
+        object-fit: cover;
+        border-radius: 10px;
+        flex-shrink: 0;
+        border: 1px solid var(--border-light);
+        background: #fff;
+      }
+      .code-thumb.zoom {
+        cursor: zoom-in;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="topBar"></div>
+    <script>
+      window.onerror = function (msg, src, line, col) {
+        var d = document.createElement('div')
+        d.style.cssText =
+          'position:fixed;top:0;left:0;right:0;z-index:99999;background:#b91c1c;color:#fff;padding:8px 12px;font:13px monospace'
+        d.textContent = 'JS error: ' + msg + ' (line ' + line + ')'
+        ;(document.body || document.documentElement).appendChild(d)
+      }
+
+      // 1. เมื่อหน้าเว็บโหลดเสร็จ ตรวจสอบว่ามีพารามิเตอร์ ?code=... ติดมากับการสแกนไหม
+      window.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search)
+        const targetCode = urlParams.get('code')
+
+        if (targetCode) {
+          // รอให้ข้อมูลในตารางโหลดเสร็จสักครู่ แล้วค่อยค้นหาและแสดงผล
+          setTimeout(function () {
+            highlightOrOpenAsset(targetCode)
+          }, 1000)
+        }
+      })
+
+      // 2. ฟังก์ชันค้นหาและกรองข้อมูลอุปกรณ์ตัวที่ถูกสแกน
+      function highlightOrOpenAsset(code) {
+        // ค้นหาข้อมูลใน globalAssets (คอลัมน์ index ที่ [3] คือรหัสอุปกรณ์)
+        const foundItem = globalAssets
+          ? globalAssets.find(
+              item => String(item[3]).trim() === String(code).trim()
+            )
+          : null
+
+        if (foundItem) {
+          Swal.fire({
+            icon: 'success',
+            title: 'สแกนสำเร็จ!',
+            text: 'พบข้อมูลอุปกรณ์รหัส: ' + code,
+            timer: 2000,
+            showConfirmButton: false
+          })
+
+          // นำรหัสไปใส่ในช่องค้นหา (Search Input) และสั่งกรองตารางทันที
+          const searchInput = document.getElementById('searchInput')
+          if (searchInput) {
+            searchInput.value = code
+            if (typeof filterAssets === 'function') {
+              filterAssets()
+            }
+          }
+        } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'ไม่พบข้อมูล',
+            text: 'ไม่พบรหัสอุปกรณ์ "' + code + '" ในระบบ'
+          })
+        }
+      }
+
+      function bsModal(id) {
+        var el = document.getElementById(id)
+        if (!el || !window.bootstrap) {
+          console.warn('ไม่พบ modal: ' + id)
+          return { show: function () {}, hide: function () {} }
+        }
+        return bootstrap.Modal.getOrCreateInstance(el)
+      }
+
+      function normNm(str) {
+        return String(str || '')
+          .replace(/\s+/g, '')
+          .trim()
+          .toLowerCase()
+      }
+
+      var session = { token: '', role: 'USER', name: '' }
+      try {
+        var _s = JSON.parse(sessionStorage.getItem('btt_session') || 'null')
+        if (_s && _s.token) session = _s
+      } catch (e) {}
+
+      function can(r) {
+        var o = { USER: 0, ADMIN: 1, IT: 2, OWNER: 2 }
+        var cur = String(session.role || 'USER').toUpperCase()
+        var req = String(r || 'USER').toUpperCase()
+        if (cur === 'IT' || cur === 'OWNER') return true
+        return (o[cur] || 0) >= (o[req] || 0)
+      }
+
+      function applyRole() {
+        document.body.classList.toggle('is-staff', can('ADMIN'))
+        document.body.classList.toggle('is-it', can('IT'))
+        document.querySelectorAll('[data-need]').forEach(function (el) {
+          el.hidden = !can(el.dataset.need)
+        })
+        document.querySelectorAll('.other-row').forEach(function (el) {
+          el.hidden = !can('ADMIN')
+        })
+        var b = document.getElementById('roleBadge')
+        if (b) {
+          b.hidden = !session.token
+          var roleLabel =
+            session.role === 'IT' || session.role === 'OWNER' ? 'IT' : 'แอดมิน'
+          b.textContent = roleLabel + ' · ' + session.name
+        }
+        var li = document.getElementById('btnLogin'),
+          lo = document.getElementById('btnLogout')
+        if (li) li.hidden = !!session.token
+        if (lo) lo.hidden = !session.token
+      }
+
+      function setSession(x) {
+        x = x || {}
+        session = {
+          token: x.token || '',
+          role: x.role || 'USER',
+          name: x.name || ''
+        }
+        try {
+          sessionStorage.setItem(
+            'btt_session',
+            session.token ? JSON.stringify(session) : ''
+          )
+        } catch (e) {}
+        applyRole()
+      }
+
+      function openLogin() {
+        Swal.fire({
+          title: 'เข้าสู่ระบบผู้ดูแล',
+          html: '<input id="lgName" class="swal2-input" placeholder="ชื่อ เช่น Admin-[ตามด้วยชื่อ]" autocomplete="username"><input id="lgPw" type="password" class="swal2-input" placeholder="รหัสผ่าน" autocomplete="current-password">',
+          showCancelButton: true,
+          confirmButtonText: 'เข้าสู่ระบบ',
+          cancelButtonText: 'ยกเลิก',
+          confirmButtonColor: '#ec4899',
+          didOpen: function () {
+            document
+              .getElementById('lgPw')
+              .addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') Swal.clickConfirm()
+              })
+          },
+          preConfirm: function () {
+            return {
+              n: document.getElementById('lgName').value,
+              p: document.getElementById('lgPw').value
+            }
+          }
+        }).then(function (r) {
+          if (!r.isConfirmed) return
+          google.script.run
+            .withSuccessHandler(function (res) {
+              if (res && res.success) {
+                setSession(res)
+                reloadThen('ยินดีต้อนรับ ' + res.name)
+              } else Swal.fire('เข้าสู่ระบบไม่สำเร็จ', (res && res.message) || '', 'error')
+            })
+            .withFailureHandler(onError)
+            .login(r.value.n, r.value.p)
+        })
+      }
+
+      function logoutNow() {
+        var t = session.token
+        setSession({})
+        if (t) google.script.run.logout(t)
+        reloadThen('ออกจากระบบแล้ว')
+      }
+
+      function renderCategoryFilter() {
+        var catSelect = document.getElementById('categoryFilter')
+        if (!catSelect) return
+        var currentVal = catSelect.value
+        var html = '<option value="">-- ทุกหมวดหมู่ --</option>'
+        if (categoriesList && categoriesList.length > 0) {
+          categoriesList.forEach(function (cat) {
+            if (cat)
+              html +=
+                '<option value="' +
+                escapeHtml(cat) +
+                '">' +
+                escapeHtml(cat) +
+                '</option>'
+          })
+        }
+        catSelect.innerHTML = html
+        catSelect.value = currentVal
+      }
+    </script>
+
+    <div class="container-fluid py-4 px-md-5">
+      <!-- Top Header -->
+      <div
+        class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2"
+      >
+        <div>
+          <h2 class="fw-bold m-0 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-boxes-stacked" style="color: #ec4899"></i
+            >ระบบจัดการเครื่องมือ
+          </h2>
+          <small class="text-muted"
+            >BTT Field Tool - ระบบบันทึกและจัดการเครื่องมืออัจฉริยะ</small
+          >
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <select
+            class="form-select form-select-sm"
+            id="operatorSelect"
+            data-need="NEVER"
+            style="width: 180px"
+            title="ชื่อผู้ใช้งาน"
+            onchange="onOperatorChange()"
+          >
+            <option value="">-- เลือกชื่อผู้ใช้งาน --</option>
+          </select>
+          <button
+            type="button"
+            class="btn btn-outline-danger btn-sm d-none"
+            id="btnDelOperator"
+            data-need="NEVER"
+            onclick="deleteSelectedOperator()"
+            title="ลบชื่อที่เลือก"
+          >
+            <i class="fa-solid fa-user-minus me-1"></i> ลบชื่อ
+          </button>
+          <input
+            type="text"
+            class="form-control form-control-sm d-none"
+            id="operatorName"
+            data-need="NEVER"
+            style="width: 160px"
+            placeholder="พิมพ์ชื่อของคุณ"
+            oninput="saveOperator()"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();addOperatorName()}"
+          />
+          <button
+            type="button"
+            class="btn btn-success btn-sm"
+            id="btnAddOperator"
+            data-need="NEVER"
+            onclick="addOperatorName()"
+            title="บันทึกชื่อนี้"
+          >
+            <i class="fa-solid fa-user-plus me-1"></i> เพิ่มชื่อ
+          </button>
+
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            onclick="openNamesModal()"
+            data-need="ADMIN"
+            title="จัดการรายชื่อ"
+          >
+            <i class="fa-solid fa-users-gear me-1"></i> จัดการรายชื่อ
+          </button>
+
+          <!-- เพิ่มปุ่มสำหรับสิทธิ์ IT -->
+          <button
+            type="button"
+            class="btn btn-outline-primary btn-sm"
+            onclick="openMasterModal('category')"
+            data-need="IT"
+            title="เพิ่ม/แก้ไข/ลบ หมวดหมู่และสถานที่"
+          >
+            <i class="fa-solid fa-folder-tree me-1"></i> หมวดหมู่/สถานที่
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-dark btn-sm"
+            onclick="openItToolsModal()"
+            data-need="IT"
+            title="แผงควบคุมระบบสำหรับ IT"
+          >
+            <i class="fa-solid fa-terminal me-1"></i> เครื่องมือ IT
+          </button>
+
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            onclick="openMasterModal('category')"
+            data-need="IT"
+            title="จัดการหมวดหมู่และสถานที่จัดเก็บ"
+          >
+            <i class="fa-solid fa-folder-tree me-1"></i> หมวดหมู่/สถานที่
+          </button>
+
+          <button
+            class="btn btn-outline-warning btn-sm"
+            onclick="openItToolsModal()"
+            data-need="IT"
+            title="เครื่องมือดูแลระบบ IT"
+          >
+            <i class="fa-solid fa-terminal me-1"></i> เครื่องมือ IT
+          </button>
+
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            onclick="openAskAI()"
+          >
+            <i class="fa-solid fa-robot me-1"></i> ถาม AI
+          </button>
+
+          <button
+            class="btn btn-sm"
+            id="btnTgJoin"
+            onclick="openTgModal()"
+            style="background: #229ed9; color: #fff; border: none"
+            title="เข้ากลุ่มรับแจ้งเตือน"
+          >
+            <i class="fa-brands fa-telegram me-1"></i> รับแจ้งเตือน
+          </button>
+
+          <span id="roleBadge" class="badge text-bg-dark" hidden></span>
+          <button
+            type="button"
+            id="btnLogin"
+            class="btn btn-outline-secondary btn-sm"
+            onclick="openLogin()"
+          >
+            <i class="fa-solid fa-lock me-1"></i> เข้าสู่ระบบแอดมิน
+          </button>
+          <button
+            type="button"
+            id="btnLogout"
+            class="btn btn-outline-danger btn-sm"
+            onclick="logoutNow()"
+            hidden
+          >
+            <i class="fa-solid fa-right-from-bracket me-1"></i> ออกจากระบบ
+          </button>
+
+          <a
+            id="btnOpenSheet"
+            data-need="IT"
+            href="#"
+            target="_blank"
+            rel="noopener"
+            class="btn btn-success btn-sm"
+            title="Google Sheet"
+            style="display: none"
+          >
+            <i class="fa-solid fa-file-excel me-1"></i> Google Sheet
+          </a>
+          <a
+            href="https://github.com/kxma-blazi/btt-Equipment"
+            target="_blank"
+            rel="noopener"
+            class="btn btn-outline-dark btn-sm"
+            title="GitHub"
+          >
+            <i class="fa-brands fa-github me-1"></i> GitHub
+          </a>
+
+          <select
+            class="form-select form-select-sm"
+            id="toneSelect"
+            style="width: 130px"
+            title="โทนตัวหนังสือโหมดมืด"
+            onchange="setTextTone(this.value)"
+          >
+            <option value="normal">ตัวอักษร: ปกติ</option>
+            <option value="soft">ตัวอักษร: นุ่มตา</option>
+            <option value="sharp">ตัวอักษร: คมชัด</option>
+          </select>
+
+          <button
+            class="btn btn-outline-secondary btn-sm"
+            onclick="toggleDarkMode()"
+          >
+            <i class="fa-solid fa-moon me-1" id="darkIcon"></i> Dark Mode
+          </button>
+          <button class="btn btn-btt btn-sm" onclick="loadData()">
+            <i class="fa-solid fa-rotate me-1"></i> รีเฟรช
+          </button>
+        </div>
+      </div>
+
+      <div id="urlWarn" data-need="IT" class="alert alert-warning d-none">
+        <b>ยังไม่ได้ตั้งลิงก์ระบบ</b> วางลิงก์ Web app (ลงท้าย /exec)
+        แล้วกดบันทึก
+        <div class="input-group mt-2">
+          <input
+            type="text"
+            class="form-control"
+            id="appUrlInput"
+            placeholder="https://script.google.com/macros/s/.../exec"
+          />
+          <button
+            class="btn btn-btt"
+            type="button"
+            onclick="saveAppUrlFromInput()"
+          >
+            บันทึกลิงก์
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Dashboard Cards -->
+      <div class="row g-3 mb-4">
+        <!-- 1. อุปกรณ์ทั้งหมด -->
+        <div class="col-md col-6">
+          <div
+            class="card p-3 stat-click"
+            id="cardTotal"
+            onclick="filterByCard('total')"
+            title="คลิกเพื่อดูทั้งหมด"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-semibold">อุปกรณ์ทั้งหมด</div>
+                <h3 class="fw-bold m-0 mt-1" id="statTotal">0</h3>
+              </div>
+              <div class="p-3 rounded-4 bg-primary bg-opacity-10 text-primary">
+                <i class="fa-solid fa-cubes fa-xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. พร้อมใช้งาน -->
+        <div class="col-md col-6">
+          <div
+            class="card p-3 stat-click"
+            id="cardAvailable"
+            onclick="filterByCard('พร้อมใช้งาน')"
+            title="คลิกเพื่อกรองเฉพาะพร้อมใช้งาน"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-semibold">พร้อมใช้งาน</div>
+                <h3 class="fw-bold m-0 mt-1 text-success" id="statAvailable">
+                  0
+                </h3>
+              </div>
+              <div class="p-3 rounded-4 bg-success bg-opacity-10 text-success">
+                <i class="fa-solid fa-circle-check fa-xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. ชำรุด -->
+        <div class="col-md col-6">
+          <div
+            class="card p-3 stat-click"
+            id="cardRepair"
+            onclick="setStatusFilter('ชำรุด')"
+            title="คลิกเพื่อกรองเฉพาะรายการชำรุด"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-semibold">ชำรุด</div>
+                <h3 class="fw-bold m-0 mt-1 text-danger" id="statRepair">0</h3>
+              </div>
+              <div class="p-3 rounded-4 bg-danger bg-opacity-10 text-danger">
+                <i class="fa-solid fa-triangle-exclamation fa-xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. ส่งซ่อม -->
+        <div class="col-md col-6">
+          <div
+            class="card p-3 stat-click"
+            id="cardFixing"
+            onclick="setStatusFilter('ส่งซ่อม')"
+            title="คลิกเพื่อกรองเฉพาะรายการส่งซ่อม"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-semibold">ส่งซ่อม</div>
+                <h3 class="fw-bold m-0 mt-1 text-warning" id="statFixing">0</h3>
+              </div>
+              <div class="p-3 rounded-4 bg-warning bg-opacity-10 text-warning">
+                <i class="fa-solid fa-screwdriver-wrench fa-xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. กำลังถูกยืม -->
+        <div class="col-md col-6">
+          <div
+            class="card p-3 stat-click"
+            id="cardBorrowed"
+            onclick="filterByCard('ถูกยืม')"
+            title="คลิกเพื่อกรองเฉพาะรายการที่ถูกยืม"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-semibold">กำลังถูกยืม</div>
+                <h3 class="fw-bold m-0 mt-1 text-warning" id="statBorrowed">
+                  0
+                </h3>
+              </div>
+              <div class="p-3 rounded-4 bg-warning bg-opacity-10 text-warning">
+                <i class="fa-solid fa-people-carry-box fa-xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. สต็อกต่ำ -->
+        <div class="col-md col-6">
+          <div
+            class="card p-3 stat-click"
+            id="cardLowStock"
+            onclick="filterByCard('lowStock')"
+            title="คลิกเพื่อกรองเฉพาะสต็อกต่ำ"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-semibold">
+                  สต็อกต่ำ / ต้องสั่งเพิ่ม
+                </div>
+                <h3 class="fw-bold m-0 mt-1 text-danger" id="statLowStock">
+                  0
+                </h3>
+              </div>
+              <div class="p-3 rounded-4 bg-danger bg-opacity-10 text-danger">
+                <i class="fa-solid fa-triangle-exclamation fa-xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <ul class="nav nav-pills mb-3" id="mainTab" role="tablist">
+        <li class="nav-item">
+          <button
+            class="nav-link active"
+            id="assets-tab"
+            data-bs-toggle="pill"
+            data-bs-target="#assets-pane"
+          >
+            <i class="fa-solid fa-list me-1"></i> ทะเบียนอุปกรณ์
+          </button>
+        </li>
+        <li class="nav-item">
+          <button
+            class="nav-link"
+            id="borrow-tab"
+            data-bs-toggle="pill"
+            data-bs-target="#borrow-pane"
+          >
+            <i class="fa-solid fa-right-left me-1"></i> คืนอุปกรณ์ / ประวัติ
+          </button>
+        </li>
+        <li class="nav-item" data-need="ADMIN">
+          <button
+            class="nav-link"
+            id="logs-tab"
+            data-bs-toggle="pill"
+            data-bs-target="#logs-pane"
+          >
+            <i class="fa-solid fa-clock-rotate-left me-1"></i> Activity Logs
+          </button>
+        </li>
+        <li class="nav-item" data-need="ADMIN">
+          <button
+            class="nav-link"
+            id="audit-tab"
+            data-bs-toggle="pill"
+            data-bs-target="#audit-pane"
+          >
+            <i class="fa-solid fa-clipboard-check me-1"></i> ตรวจสอบข้อมูล
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="mainTabContent">
+        <!-- Tab 1: Asset Management -->
+        <div class="tab-pane fade show active" id="assets-pane">
+          <div class="table-container">
+            <div class="row g-2 mb-3 align-items-center">
+              <div class="col-md-4">
+                <div class="input-group">
+                  <span class="input-group-text bg-transparent"
+                    ><i class="fa-solid fa-magnifying-glass text-muted"></i
+                  ></span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="searchInput"
+                    placeholder="ค้นหา รหัส, ชื่ออุปกรณ์..."
+                    oninput="filterAssetsDebounced()"
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <select
+                  class="form-select"
+                  id="categoryFilter"
+                  onchange="filterAssets()"
+                >
+                  <option value="">-- ทุกหมวดหมู่ --</option>
+                </select>
+              </div>
+
+              <div
+                class="col-md-5 text-md-end d-flex gap-2 justify-content-md-end flex-wrap"
+              >
+                <button
+                  class="btn btn-btt"
+                  data-need="ADMIN"
+                  onclick="openAssetModal()"
+                >
+                  <i class="fa-solid fa-plus me-1"></i> เพิ่มอุปกรณ์
+                </button>
+                <button
+                  class="btn btn-outline-success"
+                  onclick="openBorrowModal()"
+                >
+                  <i class="fa-solid fa-cart-flatbed me-1"></i> เบิก/ยืม
+                  <span
+                    class="badge bg-success ms-1"
+                    id="cartBadge"
+                    style="display: none"
+                    >0</span
+                  >
+                </button>
+                <button
+                  class="btn btn-outline-dark"
+                  onclick="openBorrowModal(true)"
+                >
+                  <i class="fa-solid fa-qrcode me-1"></i> สแกนเตรียมเบิก
+                </button>
+                <button
+                  class="btn btn-outline-primary"
+                  data-need="ADMIN"
+                  onclick="printSelectedQRCodes()"
+                >
+                  <i class="fa-solid fa-print me-1"></i> พิมพ์ QR
+                </button>
+              </div>
+            </div>
+
+            <!-- Asset Table -->
+            <div class="table-responsive">
+              <table class="table table-hover align-middle" id="assetTable">
+                <thead>
+                  <tr>
+                    <th width="40">
+                      <input
+                        type="checkbox"
+                        id="selectAll"
+                        onchange="toggleSelectAll(this)"
+                      />
+                    </th>
+                    <th width="70">รูปภาพ</th>
+                    <th width="60">QR</th>
+                    <th>รหัส</th>
+                    <th>ชื่อรายการ</th>
+                    <th>หมวดหมู่</th>
+                    <th>สถานที่</th>
+                    <th>หมายเหตุ</th>
+                    <th class="text-center">BTT</th>
+                    <th class="text-center">TKE</th>
+                    <th class="text-center">รวม</th>
+                    <th class="text-center">สถานะ</th>
+                    <th class="text-center">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="assetTableBody">
+                  <tr>
+                    <td colspan="13" class="text-center py-4 text-muted">
+                      กำลังโหลดข้อมูล...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Borrow History -->
+        <div class="tab-pane fade" id="borrow-pane">
+          <div class="table-container">
+            <h5 class="fw-bold mb-3">
+              <i
+                class="fa-solid fa-file-invoice me-2"
+                style="color: #ec4899"
+              ></i
+              >รายการเบิก-คืนอุปกรณ์
+            </h5>
+            <div class="row g-2 mb-3 align-items-center">
+              <div class="col-md-6">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="borrowSearch"
+                  placeholder="ค้นหาชื่อผู้เบิก, รหัส, โครงการ..."
+                  oninput="renderBorrowTable(globalBorrows)"
+                />
+              </div>
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="borrowOnlyActive"
+                    onchange="this.dataset.touched=1;renderBorrowTable(globalBorrows)"
+                  />
+                  <label class="form-check-label" for="borrowOnlyActive"
+                    >แสดงเฉพาะที่ยังไม่คืน</label
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>ลำดับ</th>
+                    <th>รหัสอุปกรณ์</th>
+                    <th>โครงการ</th>
+                    <th>จำนวน</th>
+                    <th>ผู้เบิก</th>
+                    <th>สถานที่</th>
+                    <th>วันที่เบิก</th>
+                    <th>วันที่คืน</th>
+                    <th>ผู้คืน</th>
+                    <th>วางไว้ที่</th>
+                    <th>สถานะ</th>
+                    <th>การทำงาน</th>
+                  </tr>
+                </thead>
+                <tbody id="borrowTableBody">
+                  <tr>
+                    <td colspan="12" class="text-center py-4 text-muted">
+                      กำลังโหลดข้อมูล...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Data audit -->
+        <div class="tab-pane fade" id="audit-pane">
+          <div class="table-container">
+            <h5 class="fw-bold mb-2">
+              <i
+                class="fa-solid fa-clipboard-check me-2"
+                style="color: #ec4899"
+              ></i
+              >ตรวจสอบข้อมูลที่นำเข้า
+            </h5>
+            <div class="text-muted small mb-3" id="auditSummary"></div>
+            <div class="row g-2 mb-3 align-items-center">
+              <div class="col-md-4">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="auditSearch"
+                  placeholder="ค้นหา รหัส, ชื่อรายการ..."
+                  oninput="renderAudit()"
+                />
+              </div>
+              <div class="col-md-4">
+                <select
+                  class="form-select"
+                  id="auditFilter"
+                  onchange="renderAudit()"
+                >
+                  <option value="">-- ทุกประเด็น --</option>
+                </select>
+              </div>
+              <div class="col-md-4 text-md-end">
+                <button class="btn btn-btt" onclick="openAuditModal()">
+                  <i class="fa-solid fa-plus me-1"></i> เพิ่มรายการ
+                </button>
+              </div>
+            </div>
+            <datalist id="auditIssueList"></datalist>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>ประเด็น</th>
+                    <th>ชีตต้นทาง</th>
+                    <th>รหัส</th>
+                    <th>ชื่อรายการ</th>
+                    <th>รายละเอียด</th>
+                    <th class="text-center">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="auditTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Activity Logs -->
+        <div class="tab-pane fade" id="logs-pane">
+          <div class="table-container">
+            <h5 class="fw-bold mb-3">
+              <i class="fa-solid fa-list-check me-2" style="color: #ec4899"></i
+              >บันทึกกิจกรรมในระบบ
+            </h5>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>วัน-เวลา</th>
+                    <th>ผู้ใช้งาน</th>
+                    <th>กิจกรรม</th>
+                    <th>รายละเอียด</th>
+                  </tr>
+                </thead>
+                <tbody id="logTableBody">
+                  <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">
+                      กำลังโหลดข้อมูล...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Add / Edit Asset -->
+    <div class="modal fade" id="assetModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold" id="assetModalTitle">
+              <i class="fa-solid fa-box-archive me-2 text-pink"></i
+              >บันทึกข้อมูลอุปกรณ์
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <form id="assetForm" onsubmit="handleAssetSubmit(event)">
+            <div class="modal-body">
+              <input type="hidden" id="oldAssetId" name="oldAssetId" />
+              <input type="hidden" id="assetImageUrl" name="assetImageUrl" />
+
+              <div class="row g-3">
+                <div class="col-md-4 text-center">
+                  <label class="form-label d-block fw-semibold"
+                    >รูปภาพอุปกรณ์</label
+                  >
+                  <img
+                    id="imagePreview"
+                    onerror="this.onerror=null;this.src='https://placehold.co/150x150?text=No+Image'"
+                    src="https://placehold.co/150x150?text=No+Image"
+                    class="img-fluid rounded-4 mb-2 border shadow-sm"
+                    style="max-height: 160px; object-fit: cover"
+                  />
+                  <input
+                    type="file"
+                    id="imageInput"
+                    class="form-control form-control-sm"
+                    accept="image/*"
+                    multiple
+                    onchange="handleImageUpload(this)"
+                  />
+                  <small class="text-muted d-block mt-1"
+                    >รองรับภาพจากกล้อง / เลือกไฟล์ภาพ</small
+                  >
+                  <div id="stagedPics" class="mt-2 d-none"></div>
+                  <div class="form-check mt-2" id="imgAddWrap">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="imgAddMode"
+                    />
+                    <label class="form-check-label small" for="imgAddMode"
+                      >เพิ่มเป็นรูปเพิ่มเติม (ไม่ทับรูปเดิม)</label
+                    >
+                  </div>
+                  <div id="picManager" class="mt-2 d-none">
+                    <div class="small fw-semibold mb-1">
+                      รูปทั้งหมด
+                      <span id="picCount" class="badge bg-secondary">0</span>
+                    </div>
+                    <div id="picGrid" class="d-flex flex-wrap gap-2"></div>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="row g-2">
+                    <div class="col-md-6">
+                      <label class="form-label fw-semibold"
+                        >รหัสอุปกรณ์
+                        <small class="text-muted fw-normal"
+                          >(เว้นว่างได้)</small
+                        ></label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="assetId"
+                        name="assetId"
+                        autocomplete="off"
+                        placeholder="เว้นว่าง = รันอัตโนมัติ"
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-semibold">ชื่อรายการ *</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="assetName"
+                        name="assetName"
+                        required
+                        placeholder="เช่น สว่านไร้สาย"
+                      />
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label fw-semibold">หมวดหมู่</label>
+                      <div class="input-group">
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="assetCategory"
+                          name="assetCategory"
+                          autocomplete="off"
+                          placeholder="พิมพ์หรือเลือก"
+                        />
+                        <button
+                          class="btn btn-outline-success"
+                          type="button"
+                          data-need="IT"
+                          onclick="quickAddLookup('category')"
+                          title="บันทึกชื่อนี้เข้าหมวดหมู่หลัก"
+                        >
+                          <i class="fa-solid fa-plus"></i>
+                        </button>
+                        <button
+                          class="btn btn-outline-secondary dropdown-toggle"
+                          type="button"
+                          data-bs-toggle="dropdown"
+                          onclick="populateDropdown('category')"
+                        ></button>
+                        <ul
+                          class="dropdown-menu dropdown-menu-end"
+                          id="catDropdownMenu"
+                          style="max-height: 200px; overflow-y: auto"
+                        ></ul>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-semibold"
+                        >สถานที่จัดเก็บ</label
+                      >
+                      <div class="input-group">
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="assetLocation"
+                          name="assetLocation"
+                          autocomplete="off"
+                          placeholder="พิมพ์หรือเลือก"
+                        />
+                        <button
+                          class="btn btn-outline-success"
+                          type="button"
+                          data-need="IT"
+                          onclick="quickAddLookup('location')"
+                          title="บันทึกชื่อนี้เข้าสถานที่หลัก"
+                        >
+                          <i class="fa-solid fa-plus"></i>
+                        </button>
+                        <button
+                          class="btn btn-outline-secondary dropdown-toggle"
+                          type="button"
+                          data-bs-toggle="dropdown"
+                          onclick="populateDropdown('location')"
+                        ></button>
+                        <ul
+                          class="dropdown-menu dropdown-menu-end"
+                          id="locDropdownMenu"
+                          style="max-height: 200px; overflow-y: auto"
+                        ></ul>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label">จำนวน BTT</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="assetBtt"
+                        name="assetBtt"
+                        value="0"
+                        min="0"
+                      />
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">จำนวน TKE</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="assetTke"
+                        name="assetTke"
+                        value="0"
+                        min="0"
+                      />
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">Stock Min</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="assetMin"
+                        name="assetMin"
+                        value="0"
+                        min="0"
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">ราคา/หน่วย (บาท)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        class="form-control"
+                        id="assetPrice"
+                        name="assetPrice"
+                        value="0"
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">สถานะ</label>
+                      <select
+                        class="form-select"
+                        id="assetStatus"
+                        name="assetStatus"
+                      >
+                        <option value="พร้อมใช้งาน">พร้อมใช้งาน</option>
+                        <option value="ถูกยืม">ถูกยืม</option>
+                        <option value="ชำรุด">ชำรุด</option>
+                        <option value="ส่งซ่อม">ส่งซ่อม</option>
+                        <option value="สูญหาย">สูญหาย</option>
+                      </select>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">หมายเหตุ</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="assetRemark"
+                        name="assetRemark"
+                        placeholder="ระบุรายละเอียดเพิ่มเติม"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                ยกเลิก
+              </button>
+              <button type="submit" class="btn btn-btt" id="btnSaveAsset">
+                บันทึกข้อมูล
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Borrow Item Form -->
+    <div class="modal fade" id="borrowModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold">
+              <i
+                class="fa-solid fa-cart-flatbed me-2"
+                style="color: #ec4899"
+              ></i
+              >ฟอร์มเบิก/ยืมอุปกรณ์
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              onclick="stopQrScanner()"
+            ></button>
+          </div>
+          <form id="borrowForm" onsubmit="handleBorrowSubmit(event)">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">ชื่อผู้เบิก *</label>
+                <input
+                  type="text"
+                  class="form-control form-control-sm mb-2"
+                  id="borrowerSearch"
+                  placeholder="ค้นหาชื่อ..."
+                  oninput="filterBorrowerList()"
+                />
+                <div
+                  class="list-group rounded-4"
+                  id="borrowerList"
+                  style="max-height: 200px; overflow-y: auto"
+                ></div>
+                <input
+                  type="text"
+                  class="form-control mt-2 d-none"
+                  id="borrowerName"
+                  placeholder="พิมพ์ชื่อ-นามสกุล ผู้เบิก"
+                  oninput="renderPlaceSuggest()"
+                />
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-success mt-2"
+                  id="btnAddBorrower"
+                  data-need="ADMIN"
+                  onclick="addBorrowerFromForm()"
+                >
+                  <i class="fa-solid fa-user-plus me-1"></i>
+                  เพิ่มชื่อนี้เข้ารายชื่อ
+                </button>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">ชื่อโครงการ / หน้า Site งาน</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="projectName"
+                  placeholder="เช่น โครงการ BTT-Tower"
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">สถานที่นำไปใช้</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="locationAddress"
+                  autocomplete="off"
+                  placeholder="ระบุสถานที่ใช้งาน ออฟฟิศ หรือหน้างาน"
+                  oninput="renderPlaceSuggest()"
+                />
+                <div
+                  id="placeSuggest"
+                  class="d-flex flex-wrap gap-2 mt-2"
+                ></div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold"
+                  >เลือกชุดกล่องด่วน (แบบ Fix)</label
+                >
+                <div class="d-flex flex-wrap gap-2" id="boxPresetList">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary rounded-pill"
+                    data-preset="A"
+                  >
+                    ชุด A: กล่อง 1, 2, 3
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary rounded-pill"
+                    data-preset="B"
+                  >
+                    ชุด B: กล่อง 2, 3
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary rounded-pill"
+                    data-preset="C"
+                  >
+                    ชุด C: กล่อง 2
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary rounded-pill"
+                    data-preset="D"
+                  >
+                    ชุด D: กล่อง 1
+                  </button>
+                </div>
+                <small class="text-muted d-block mt-1">
+                  กดเลือกชุดเพื่อเติมรหัสกล่องเข้าตะกร้าเบิกอัตโนมัติ
+                  (ปรับจำนวนหรือลบออกได้ก่อนยืนยัน)
+                </small>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold"
+                  >เลือกอุปกรณ์ที่ต้องการเบิก *</label
+                >
+                <div class="input-group mb-1">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="borrowAssetSearch"
+                    placeholder="พิมพ์รหัส หรือชื่อ..."
+                    autocomplete="off"
+                    oninput="renderAssetSuggest()"
+                    onkeydown="onAssetSearchKey(event)"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-success"
+                    onclick="addFromSearch()"
+                  >
+                    <i class="fa-solid fa-plus"></i> เพิ่ม
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    onclick="startQrScanner()"
+                  >
+                    <i class="fa-solid fa-camera me-1"></i> สแกน QR
+                  </button>
+                </div>
+                <div
+                  id="assetSuggest"
+                  class="list-group mb-2"
+                  style="max-height: 200px; overflow-y: auto"
+                ></div>
+                <div
+                  id="qr-reader"
+                  style="display: none; width: 100%"
+                  class="mb-2 border rounded-4 p-1 bg-light"
+                ></div>
+                <button
+                  type="button"
+                  id="btnStopScanner"
+                  class="btn btn-sm btn-danger w-100 mb-2 rounded-3"
+                  style="display: none"
+                  onclick="stopQrScanner()"
+                >
+                  <i class="fa-solid fa-stop me-1"></i> ปิดกล้องสแกน
+                </button>
+              </div>
+              <div class="mb-3">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-1"
+                >
+                  <label class="form-label fw-semibold m-0"
+                    >รายการเตรียมเบิก (<span id="cartCount">0</span>)</label
+                  >
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-link text-danger p-0"
+                    onclick="clearCart()"
+                  >
+                    ล้างทั้งหมด
+                  </button>
+                </div>
+                <div id="cartList" class="list-group rounded-4"></div>
+              </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+                onclick="stopQrScanner()"
+              >
+                ยกเลิก
+              </button>
+              <button type="submit" class="btn btn-success" id="btnSaveBorrow">
+                ยืนยันการเบิก
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating contact button -->
+    <button
+      type="button"
+      class="ct-fab"
+      onclick="openContactModal()"
+      title="ติดต่อผู้ดูแลระบบ"
+    >
+      <i class="fa-brands fa-line fs-4"></i> ติดต่อผู้ดูแลระบบ
+    </button>
+
+    <!-- Modal: Contact popup -->
+    <div class="modal fade" id="contactModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 400px">
+        <div class="modal-content ct-card">
+          <button
+            type="button"
+            class="btn-close ct-close"
+            data-bs-dismiss="modal"
+          ></button>
+          <div class="ct-hero">
+            <div class="ct-avatar"><i class="fa-solid fa-headset"></i></div>
+            <div class="ct-name" id="ctName"></div>
+            <div class="ct-title" id="ctTitle"></div>
+            <div class="ct-note" id="ctNote"></div>
+          </div>
+          <div class="ct-qrwrap">
+            <div class="ct-qr" id="ctQr"></div>
+            <div class="ct-scan" id="ctScan">
+              <i class="fa-brands fa-line"></i> สแกนเพื่อแอดไลน์
+            </div>
+          </div>
+          <div class="ct-rows" id="ctRows"></div>
+          <div class="ct-hours" id="ctHours"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Telegram join -->
+    <div class="modal fade" id="tgModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 400px">
+        <div class="modal-content ct-card">
+          <button
+            type="button"
+            class="btn-close ct-close"
+            data-bs-dismiss="modal"
+          ></button>
+          <div
+            class="ct-hero"
+            style="
+              background: linear-gradient(135deg, #2aabee 0%, #229ed9 100%);
+            "
+          >
+            <div class="ct-avatar"><i class="fa-brands fa-telegram"></i></div>
+            <div class="ct-name">รับแจ้งเตือนผ่าน Telegram</div>
+            <div class="ct-note">รู้ทันทีว่าใครเบิก/คืนอุปกรณ์อะไร</div>
+          </div>
+          <div class="ct-qrwrap">
+            <div class="ct-qr" id="tgQr"></div>
+            <div class="ct-scan" style="color: #229ed9">
+              <i class="fa-solid fa-qrcode"></i> สแกนเพื่อเข้ากลุ่ม
+            </div>
+          </div>
+          <div class="ct-rows">
+            <div class="ct-row">
+              <div class="ct-txt">
+                <small>ขั้นตอน</small>
+                <div style="word-break: normal">
+                  1) กดปุ่มด้านล่างหรือสแกน QR<br />2) กด Join Group ใน
+                  Telegram<br />3) เสร็จแล้ว รอรับแจ้งเตือนได้เลย
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex gap-2 px-4 pb-4">
+            <a
+              id="tgJoinBtn"
+              href="#"
+              target="_blank"
+              rel="noopener"
+              class="btn flex-grow-1"
+              style="background: #229ed9; color: #fff"
+            >
+              <i class="fa-brands fa-telegram me-1"></i> เข้ากลุ่มเลย
+            </a>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              onclick="copyTgLink()"
+              title="คัดลอกลิงก์"
+            >
+              <i class="fa-regular fa-copy"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Manage names -->
+    <div class="modal fade" id="namesModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold">
+              <i class="fa-solid fa-users-gear me-2" style="color: #ec4899"></i
+              >จัดการรายชื่อผู้เบิก
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="input-group mb-2">
+              <input
+                type="text"
+                class="form-control"
+                id="newNameInput"
+                placeholder="พิมพ์ชื่อใหม่"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();addNameFromInput()}"
+              />
+              <button
+                class="btn btn-btt"
+                type="button"
+                onclick="addNameFromInput()"
+              >
+                <i class="fa-solid fa-plus me-1"></i> เพิ่ม
+              </button>
+            </div>
+            <input
+              type="text"
+              class="form-control form-control-sm mb-2"
+              id="nameManageSearch"
+              placeholder="ค้นหาชื่อ..."
+              oninput="renderNamesManager()"
+            />
+            <div class="text-muted small mb-2" id="nameManageCount"></div>
+            <div
+              class="list-group rounded-4"
+              id="namesManageList"
+              style="max-height: 320px; overflow-y: auto"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Add / Edit audit row -->
+    <div class="modal fade" id="auditModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold" id="auditModalTitle">
+              แก้ไขรายการตรวจสอบ
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <form id="auditForm" onsubmit="handleAuditSubmit(event)">
+            <div class="modal-body">
+              <input type="hidden" id="auditRow" />
+              <input type="hidden" id="auditExpectCode" />
+              <input type="hidden" id="auditExpectName" />
+              <div class="mb-2">
+                <label class="form-label fw-semibold">ประเด็น</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="auditIssue"
+                  list="auditIssueList"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="row g-2 mb-2">
+                <div class="col-6">
+                  <label class="form-label fw-semibold">ชีตต้นทาง</label>
+                  <input type="text" class="form-control" id="auditSource" />
+                </div>
+                <div class="col-6">
+                  <label class="form-label fw-semibold">รหัส</label>
+                  <input type="text" class="form-control" id="auditCode" />
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label fw-semibold">ชื่อรายการ</label>
+                <input type="text" class="form-control" id="auditName" />
+              </div>
+              <div class="mb-2">
+                <label class="form-label fw-semibold">รายละเอียด</label>
+                <textarea
+                  class="form-control"
+                  id="auditDetail"
+                  rows="3"
+                ></textarea>
+              </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                ยกเลิก
+              </button>
+              <button type="submit" class="btn btn-btt">บันทึก</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Image Gallery -->
+    <div class="modal fade" id="imageGalleryModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold">
+              <i class="regular fa-images me-2 text-pink"></i
+              >รูปภาพอุปกรณ์ทั้งหมด
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body text-center" id="modalGalleryBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: AI Chat (ผู้ช่วยประจำระบบ) -->
+    <div class="modal fade" id="aiModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered ai-dialog">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold">
+              <i class="fa-solid fa-robot me-2" style="color: #ec4899"></i
+              >ผู้ช่วยประจำระบบ
+              <span
+                id="aiRoleTag"
+                class="badge bg-secondary ms-1 fw-normal"
+              ></span>
+            </h5>
+            <div class="ms-auto d-flex align-items-center gap-2">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                onclick="aiClear()"
+                title="เริ่มคุยใหม่"
+              >
+                <i class="fa-solid fa-broom"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+          </div>
+          <div class="modal-body pt-2">
+            <div id="aiMsgs" class="ai-msgs"></div>
+            <div id="aiChips" class="ai-chips"></div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <div class="input-group">
+              <textarea
+                id="aiInput"
+                class="form-control"
+                rows="2"
+                placeholder="พิมพ์คำถาม... (Enter = ส่ง, Shift+Enter = ขึ้นบรรทัดใหม่)"
+                onkeydown="aiKey(event)"
+              ></textarea>
+              <button
+                type="button"
+                class="btn btn-btt"
+                id="aiSend"
+                onclick="aiSend()"
+                title="ส่ง"
+              >
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Master Data Manager (หมวดหมู่ & สถานที่จัดเก็บ สำหรับ IT) -->
+    <div class="modal fade" id="masterModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold">
+              <i class="fa-solid fa-folder-tree me-2" style="color: #ec4899"></i
+              >จัดการหมวดหมู่และสถานที่
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="btn-group w-100 mb-3" role="group">
+              <button
+                type="button"
+                class="btn btn-sm btn-btt"
+                id="tabMasterCat"
+                onclick="switchMasterTab('category')"
+              >
+                <i class="fa-solid fa-tags me-1"></i> หมวดหมู่ (<span
+                  id="cntMasterCat"
+                  >0</span
+                >)
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                id="tabMasterLoc"
+                onclick="switchMasterTab('location')"
+              >
+                <i class="fa-solid fa-location-dot me-1"></i> สถานที่จัดเก็บ
+                (<span id="cntMasterLoc">0</span>)
+              </button>
+            </div>
+
+            <div class="input-group mb-2">
+              <input
+                type="text"
+                class="form-control"
+                id="newMasterInput"
+                placeholder="พิมพ์ชื่อใหม่..."
+                onkeydown="if(event.key==='Enter'){event.preventDefault();addMasterFromInput()}"
+              />
+              <button
+                class="btn btn-btt"
+                type="button"
+                onclick="addMasterFromInput()"
+              >
+                <i class="fa-solid fa-plus me-1"></i> เพิ่ม
+              </button>
+            </div>
+
+            <input
+              type="text"
+              class="form-control form-control-sm mb-2"
+              id="masterSearchInput"
+              placeholder="ค้นหารายการ..."
+              oninput="renderMasterManager()"
+            />
+
+            <div
+              class="list-group rounded-4"
+              id="masterManageList"
+              style="max-height: 320px; overflow-y: auto"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: IT System Tools -->
+    <div class="modal fade" id="itToolsModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold">
+              <i class="fa-solid fa-terminal me-2" style="color: #ec4899"></i
+              >แผงควบคุมระบบ IT
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold small"
+                >ลิงก์ Web App ปัจจุบัน (/exec)</label
+              >
+              <div class="input-group input-group-sm">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="itAppUrlInput"
+                  placeholder="https://script.google.com/macros/s/.../exec"
+                />
+                <button
+                  class="btn btn-btt"
+                  type="button"
+                  onclick="saveItAppUrl()"
+                >
+                  บันทึก URL
+                </button>
+              </div>
+            </div>
+
+            <div class="fw-semibold small mb-2">
+              คำสั่งจัดการ Google Sheet & Cache
+            </div>
+            <div class="d-grid gap-2 mb-3">
+              <button
+                type="button"
+                class="btn btn-outline-primary text-start"
+                onclick="execItTool('fixImages')"
+              >
+                <i class="fa-solid fa-image me-2"></i>อัปเดตสูตรรูปภาพทั้งชีต
+                (fixImageFormulas)
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-primary text-start"
+                onclick="execItTool('setupQr')"
+              >
+                <i class="fa-solid fa-qrcode me-2"></i>อัปเดตสูตร QR Code
+                ทั้งชีต (setupQrFormulas)
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-warning text-start"
+                onclick="execItTool('clearCache')"
+              >
+                <i class="fa-solid fa-broom me-2"></i>ล้างแคชข้อมูลและรูปภาพ
+                GitHub ทันที
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary text-start"
+                onclick="execItTool('setupAll')"
+              >
+                <i class="fa-solid fa-database me-2"></i
+                >ตรวจสอบ/สร้างชีตมาตรฐานในระบบ (setupAll)
+              </button>
+            </div>
+
+            <div class="fw-semibold small mb-2">สำรองข้อมูล (Export CSV)</div>
+            <div class="d-flex gap-2">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-success flex-grow-1"
+                onclick="exportSystemCsv('assets')"
+              >
+                <i class="fa-solid fa-file-csv me-1"></i> โหลดทะเบียนอุปกรณ์
+                (.csv)
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-success flex-grow-1"
+                onclick="exportSystemCsv('borrows')"
+              >
+                <i class="fa-solid fa-file-csv me-1"></i> โหลดประวัติเบิก-คืน
+                (.csv)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var activeMasterType = 'category'
+      var renamingMasterVal = ''
+
+      function openMasterModal(type) {
+        activeMasterType = type || 'category'
+        renamingMasterVal = ''
+        document.getElementById('newMasterInput').value = ''
+        document.getElementById('masterSearchInput').value = ''
+        switchMasterTab(activeMasterType)
+        bsModal('masterModal').show()
+      }
+
+      function switchMasterTab(type) {
+        activeMasterType = type
+        renamingMasterVal = ''
+        var isCat = type === 'category'
+        document.getElementById('tabMasterCat').className =
+          'btn btn-sm ' + (isCat ? 'btn-btt' : 'btn-outline-secondary')
+        document.getElementById('tabMasterLoc').className =
+          'btn btn-sm ' + (!isCat ? 'btn-btt' : 'btn-outline-secondary')
+        document.getElementById('newMasterInput').placeholder = isCat
+          ? 'พิมพ์ชื่อหมวดหมู่ใหม่ เช่น 5_เครื่องมือวัด...'
+          : 'พิมพ์ชื่อสถานที่จัดเก็บใหม่...'
+        renderMasterManager()
+      }
+
+      function renderMasterManager() {
+        var box = document.getElementById('masterManageList')
+        if (!box) return
+        document.getElementById('cntMasterCat').innerText = (
+          categoriesList || []
+        ).length
+        document.getElementById('cntMasterLoc').innerText = (
+          locationsList || []
+        ).length
+
+        var list =
+          activeMasterType === 'category'
+            ? categoriesList || []
+            : locationsList || []
+        var q = (document.getElementById('masterSearchInput').value || '')
+          .trim()
+          .toLowerCase()
+        var filtered = list.filter(function (v) {
+          return !q || String(v).toLowerCase().indexOf(q) >= 0
+        })
+
+        if (!filtered.length) {
+          box.innerHTML =
+            '<div class="list-group-item text-center text-muted small">ไม่พบรายการ</div>'
+          return
+        }
+
+        box.innerHTML = filtered
+          .map(function (val) {
+            var ev = escapeHtml(val)
+            if (val === renamingMasterVal) {
+              return (
+                '<div class="list-group-item d-flex align-items-center gap-2">' +
+                '<input type="text" class="form-control form-control-sm" id="renameMasterInp" value="' +
+                ev +
+                '">' +
+                '<button type="button" class="btn btn-sm btn-btt" onclick="saveMasterRename(\'' +
+                ev.replace(/'/g, "\\'") +
+                '\')"><i class="fa-solid fa-check"></i></button>' +
+                '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="renamingMasterVal=\'\';renderMasterManager()"><i class="fa-solid fa-xmark"></i></button>' +
+                '</div>'
+              )
+            }
+            return (
+              '<div class="list-group-item d-flex align-items-center gap-2">' +
+              '<span class="flex-grow-1">' +
+              ev +
+              '</span>' +
+              '<button type="button" class="btn btn-sm btn-outline-primary" onclick="renamingMasterVal=\'' +
+              ev.replace(/'/g, "\\'") +
+              '\';renderMasterManager()" title="แก้ไขชื่อ"><i class="fa-solid fa-pen"></i></button>' +
+              '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteMasterItem(\'' +
+              ev.replace(/'/g, "\\'") +
+              '\')" title="ลบ"><i class="fa-solid fa-trash"></i></button>' +
+              '</div>'
+            )
+          })
+          .join('')
+      }
+
+      function addMasterFromInput() {
+        var inp = document.getElementById('newMasterInput')
+        var val = inp.value.trim()
+        if (!val) return
+        Swal.fire({
+          title: 'กำลังบันทึก...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        })
+        google.script.run
+          .withSuccessHandler(function (res) {
+            Swal.close()
+            if (res && res.success) {
+              inp.value = ''
+              loadData(res.message)
+              setTimeout(renderMasterManager, 600)
+            } else {
+              Swal.fire('ข้อผิดพลาด', res ? res.message : 'ไม่สำเร็จ', 'error')
+            }
+          })
+          .withFailureHandler(onError)
+          .addLookupItem(activeMasterType, val, getOperator(), session.token)
+      }
+
+      function quickAddLookup(type) {
+        var inp = document.getElementById(
+          type === 'category' ? 'assetCategory' : 'assetLocation'
+        )
+        var val = inp ? inp.value.trim() : ''
+        if (!val) {
+          toast('warning', 'กรุณาพิมพ์ชื่อก่อนกดเพิ่ม')
+          return
+        }
+        Swal.fire({
+          title: 'กำลังบันทึก...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        })
+        google.script.run
+          .withSuccessHandler(function (res) {
+            Swal.close()
+            if (res && res.success) {
+              loadData(res.message)
+            } else {
+              Swal.fire('ข้อผิดพลาด', res ? res.message : 'ไม่สำเร็จ', 'error')
+            }
+          })
+          .withFailureHandler(onError)
+          .addLookupItem(type, val, getOperator(), session.token)
+      }
+
+      function saveMasterRename(oldVal) {
+        var inp = document.getElementById('renameMasterInp')
+        var newVal = inp ? inp.value.trim() : ''
+        if (!newVal) return
+        if (newVal === oldVal) {
+          renamingMasterVal = ''
+          renderMasterManager()
+          return
+        }
+        Swal.fire({
+          title: 'กำลังอัปเดต...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        })
+        google.script.run
+          .withSuccessHandler(function (res) {
+            Swal.close()
+            if (res && res.success) {
+              renamingMasterVal = ''
+              loadData(res.message)
+              setTimeout(renderMasterManager, 600)
+            } else {
+              Swal.fire('ข้อผิดพลาด', res ? res.message : 'ไม่สำเร็จ', 'error')
+            }
+          })
+          .withFailureHandler(onError)
+          .renameLookupItem(
+            activeMasterType,
+            oldVal,
+            newVal,
+            getOperator(),
+            session.token
+          )
+      }
+
+      function deleteMasterItem(val) {
+        Swal.fire({
+          title: 'ลบรายการนี้?',
+          text: val,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'ลบ',
+          confirmButtonColor: '#dc3545'
+        }).then(function (r) {
+          if (!r.isConfirmed) return
+          Swal.fire({
+            title: 'กำลังลบ...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+          })
+          google.script.run
+            .withSuccessHandler(function (res) {
+              Swal.close()
+              if (res && res.success) {
+                loadData(res.message)
+                setTimeout(renderMasterManager, 600)
+              } else {
+                Swal.fire(
+                  'ข้อผิดพลาด',
+                  res ? res.message : 'ไม่สำเร็จ',
+                  'error'
+                )
+              }
+            })
+            .withFailureHandler(onError)
+            .deleteLookupItem(
+              activeMasterType,
+              val,
+              getOperator(),
+              session.token
+            )
+        })
+      }
+
+      function openItToolsModal() {
+        var inp = document.getElementById('itAppUrlInput')
+        if (inp) inp.value = appUrl || ''
+        bsModal('itToolsModal').show()
+      }
+
+      function saveItAppUrl() {
+        var v = document.getElementById('itAppUrlInput').value
+        Swal.fire({
+          title: 'กำลังบันทึก...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        })
+        google.script.run
+          .withSuccessHandler(function (res) {
+            Swal.close()
+            if (res && res.success) {
+              loadData(res.message)
+            } else {
+              Swal.fire('ข้อผิดพลาด', res ? res.message : 'ไม่สำเร็จ', 'error')
+            }
+          })
+          .withFailureHandler(onError)
+          .saveAppUrl(v, session.token)
+      }
+
+      function execItTool(action) {
+        Swal.fire({
+          title: 'กำลังประมวลผล...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        })
+        google.script.run
+          .withSuccessHandler(function (res) {
+            Swal.close()
+            if (res && res.success) {
+              loadData(res.message)
+            } else {
+              Swal.fire('ข้อผิดพลาด', res ? res.message : 'ไม่สำเร็จ', 'error')
+            }
+          })
+          .withFailureHandler(onError)
+          .runItMaintenance(action, getOperator(), session.token)
+      }
+
+      function exportSystemCsv(kind) {
+        var rows = []
+        var filename = 'btt-backup.csv'
+        if (kind === 'assets') {
+          filename =
+            'BTT_Assets_' + new Date().toISOString().slice(0, 10) + '.csv'
+          rows.push([
+            'รหัส',
+            'ชื่อรายการ',
+            'หมวดหมู่',
+            'สถานที่จัดเก็บ',
+            'StockMin',
+            'ราคา',
+            'BTT',
+            'TKE',
+            'รวม',
+            'สถานะ',
+            'หมายเหตุ'
+          ])
+          ;(globalAssets || []).forEach(function (a) {
+            rows.push([
+              a[3],
+              a[4],
+              a[5],
+              a[6],
+              a[8],
+              a[9],
+              a[10],
+              a[11],
+              a[12],
+              a[13],
+              a[15]
+            ])
+          })
+        } else {
+          filename =
+            'BTT_Borrows_' + new Date().toISOString().slice(0, 10) + '.csv'
+          rows.push([
+            'ลำดับ',
+            'รหัสอุปกรณ์',
+            'โครงการ',
+            'จำนวน',
+            'วันที่เบิก',
+            'วันที่คืน',
+            'ผู้เบิก',
+            'สถานที่',
+            'สถานะ',
+            'ผู้คืน',
+            'วางไว้ที่'
+          ])
+          ;(globalBorrows || []).forEach(function (b) {
+            rows.push([
+              b[0],
+              b[1],
+              b[2],
+              b[3],
+              b[4],
+              b[5],
+              b[6],
+              b[7],
+              b[8],
+              b[12],
+              b[13]
+            ])
+          })
+        }
+        var csv =
+          '\uFEFF' +
+          rows
+            .map(function (r) {
+              return r
+                .map(function (c) {
+                  return (
+                    '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"'
+                  )
+                })
+                .join(',')
+            })
+            .join('\n')
+        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+        var a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = filename
+        a.click()
+        toast('success', 'ดาวน์โหลดไฟล์สำรองเรียบร้อย')
+      }
+    </script>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      let globalAssets = []
+      let globalBorrows = []
+      let globalAudit = []
+      let selectedCodes = new Set()
+      let assetModal, borrowModal
+      let html5QrCode = null
+      let appUrl = ''
+      let pendingCode = ''
+      let dataLoaded = false
+      let categoriesList = []
+      let locationsList = []
+      let borrowersList = []
+      let cart = []
+      let lastScan = { code: '', t: 0 }
+      let pendingBorrowerTick = ''
+      let pendingAuditRow = ''
+      let renamingName = ''
+      let statusFilterOn = false
+      let activeStatusFilter = ''
+      let activeCardFilter = ''
+      let placesList = []
+      let placesByUser = {}
+      let lastRet = {}
+      const BORROWER_OTHER = '__other__'
+      const OP_OTHER = '__other__'
+
+      function nameChoicesHtml(names, checked, withDel) {
+        var h = ''
+        names.forEach(function (n) {
+          h +=
+            '<label class="list-group-item d-flex align-items-center gap-2 name-row text-start" data-name="' +
+            escapeHtml(n.toLowerCase()) +
+            '"><input class="form-check-input m-0 name-tick" type="checkbox" value="' +
+            escapeHtml(n) +
+            '"' +
+            (n === checked ? ' checked' : '') +
+            '> <span>' +
+            escapeHtml(n) +
+            '</span>' +
+            (withDel
+              ? '<button type="button" class="btn btn-sm btn-outline-danger ms-auto py-0 px-2 name-del" data-del-name="' +
+                escapeHtml(n) +
+                '" title="ลบ"><i class="fa-solid fa-trash"></i></button>'
+              : '') +
+            '</label>'
+        })
+        return h
+      }
+
+      function singleTick(container, onChange) {
+        container.addEventListener('change', function (e) {
+          var t = e.target
+          if (!t.classList.contains('name-tick')) return
+          if (t.checked)
+            container.querySelectorAll('.name-tick').forEach(function (x) {
+              if (x !== t) x.checked = false
+            })
+          if (onChange) onChange()
+        })
+      }
+
+      function renderBorrowerOptions() {
+        var box = document.getElementById('borrowerList')
+        var cur = pendingBorrowerTick || getBorrowerTick()
+        pendingBorrowerTick = ''
+        box.innerHTML =
+          nameChoicesHtml(borrowersList, cur, can('IT')) +
+          '<label class="list-group-item d-flex align-items-center gap-2 other-row text-start"><input class="form-check-input m-0 name-tick" type="checkbox" value="' +
+          BORROWER_OTHER +
+          '"' +
+          (cur === BORROWER_OTHER ? ' checked' : '') +
+          '> <span>➕ พิมพ์ชื่อเอง</span></label>'
+        filterBorrowerList()
+        applyRole()
+        onBorrowerChange()
+      }
+
+      function getBorrowerTick() {
+        var t = document.querySelector('#borrowerList .name-tick:checked')
+        return t ? t.value : ''
+      }
+
+      function filterBorrowerList() {
+        var q = document
+          .getElementById('borrowerSearch')
+          .value.trim()
+          .toLowerCase()
+        document
+          .querySelectorAll('#borrowerList .name-row')
+          .forEach(function (r) {
+            r.classList.toggle('d-none', !!q && r.dataset.name.indexOf(q) < 0)
+          })
+      }
+
+      function onBorrowerChange() {
+        var other = getBorrowerTick() === BORROWER_OTHER
+        var inp = document.getElementById('borrowerName')
+        inp.classList.toggle('d-none', !other)
+        if (!other) inp.value = ''
+        else inp.focus()
+        renderPlaceSuggest()
+      }
+
+      function getBorrowerName() {
+        var v = getBorrowerTick()
+        return v === BORROWER_OTHER
+          ? document.getElementById('borrowerName').value.trim()
+          : v
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        assetModal = bsModal('assetModal')
+        borrowModal = bsModal('borrowModal')
+        applyRole()
+        initOperator()
+        singleTick(document.getElementById('borrowerList'), onBorrowerChange)
+        bindTableActions()
+        bindCart()
+        loadCart()
+        renderCart()
+        loadData()
+        try {
+          google.script.url.getLocation(function (loc) {
+            var c = loc && loc.parameter && loc.parameter.code
+            if (c) {
+              pendingCode = Array.isArray(c) ? c[0] : c
+              processPendingCode()
+            }
+          })
+        } catch (e) {}
+      })
+
+      function bindTableActions() {
+        const ab = document.getElementById('assetTableBody')
+        if (ab) {
+          ab.addEventListener('click', e => {
+            const t = e.target.closest('[data-act]')
+            if (!t) return
+            const code = t.dataset.code
+            if (t.dataset.act === 'edit') editAsset(code)
+            else if (t.dataset.act === 'del') deleteAsset(code)
+            else if (t.dataset.act === 'ret') returnFromAsset(code)
+            else if (t.dataset.act === 'img') openImageGallery(t.dataset.img)
+            else if (t.dataset.act === 'qr') showQRModal(code, t.dataset.qr)
+          })
+          ab.addEventListener('change', e => {
+            if (e.target.classList.contains('asset-checkbox'))
+              toggleSelectCode(e.target.value, e.target.checked)
+          })
+          ab.addEventListener('click', e => {
+            if (
+              e.target.closest(
+                'button, a, input, select, label, img, [data-act]'
+              )
+            )
+              return
+            var sel = window.getSelection && window.getSelection().toString()
+            if (sel) return
+            var tr = e.target.closest('tr')
+            if (!tr) return
+            var cb = tr.querySelector('.asset-checkbox')
+            if (!cb) return
+            cb.checked = !cb.checked
+            toggleSelectCode(cb.value, cb.checked)
+            syncSelectAll()
+          })
+        }
+
+        const bb = document.getElementById('borrowTableBody')
+        if (bb) {
+          bb.addEventListener('click', e => {
+            const t = e.target.closest('[data-act="return"]')
+            if (t) returnAssetItem(t.dataset.code, t.dataset.row)
+          })
+        }
+        bindExtraActions()
+      }
+
+      function renderOperatorOptions() {
+        var sel = document.getElementById('operatorSelect')
+        var inp = document.getElementById('operatorName')
+        var name = ''
+        if (sel.dataset.ready) name = getOperator()
+        else {
+          try {
+            name = localStorage.getItem('btt_operator') || ''
+          } catch (e) {}
+        }
+        sel.dataset.ready = '1'
+        var html = '<option value="">-- เลือกชื่อผู้ใช้งาน --</option>'
+        borrowersList.forEach(function (n) {
+          html +=
+            '<option value="' +
+            escapeHtml(n) +
+            '">' +
+            escapeHtml(n) +
+            '</option>'
+        })
+        html += '<option value="' + OP_OTHER + '">➕ พิมพ์เอง</option>'
+        sel.innerHTML = html
+        if (name && borrowersList.indexOf(name) >= 0) sel.value = name
+        else if (name) {
+          sel.value = OP_OTHER
+          inp.value = name
+        } else sel.value = ''
+        inp.classList.toggle('d-none', sel.value !== OP_OTHER)
+        syncOperatorDelBtn()
+      }
+
+      function openAssetModal() {
+        pendingAuditRow = ''
+        document.getElementById('assetForm').reset()
+        document.getElementById('oldAssetId').value = ''
+        document.getElementById('assetImageUrl').value = ''
+        document.getElementById('picManager').classList.add('d-none')
+        document.getElementById('imgAddWrap').classList.add('d-none')
+        stagedPics = []
+        renderStaged()
+        document.getElementById('imagePreview').src =
+          'https://placehold.co/150x150?text=No+Image'
+        document.getElementById('assetModalTitle').innerText =
+          'เพิ่มอุปกรณ์ใหม่'
+        assetModal.show()
+      }
+
+      function availableAssets() {
+        return globalAssets.filter(function (a) {
+          return a[13] === 'พร้อมใช้งาน' && (Number(a[12]) || 0) > 0
+        })
+      }
+
+      function fillAssetSelect() {
+        var inp = document.getElementById('borrowAssetSearch')
+        if (inp) inp.value = ''
+        renderAssetSuggest()
+      }
+
+      function renderAssetSuggest() {
+        var box = document.getElementById('assetSuggest')
+        if (!box) return
+        var q = normNm(document.getElementById('borrowAssetSearch').value)
+        if (!q) {
+          box.innerHTML = ''
+          return
+        }
+        var hits = availableAssets()
+          .filter(function (a) {
+            return normNm(a[3]).includes(q) || normNm(a[4]).includes(q)
+          })
+          .slice(0, 8)
+        box.innerHTML = hits.length
+          ? hits
+              .map(function (a) {
+                return (
+                  '<button type="button" class="list-group-item list-group-item-action py-2 d-flex align-items-center gap-2" data-sug="' +
+                  escapeHtml(a[3]) +
+                  '">' +
+                  thumbHtml(a[3], 56) +
+                  '<div class="flex-grow-1 text-start"><b>' +
+                  escapeHtml(a[3]) +
+                  '</b> - ' +
+                  escapeHtml(a[4]) +
+                  ' <small class="text-muted">(เหลือ ' +
+                  escapeHtml(a[12]) +
+                  ')</small>' +
+                  '<div class="small text-success"><i class="fa-solid fa-location-dot me-1"></i>' +
+                  escapeHtml(a[6] || 'ไม่ระบุที่เก็บ') +
+                  '</div>' +
+                  lastReturnHtml(a[3]) +
+                  '</div></button>'
+                )
+              })
+              .join('')
+          : '<div class="list-group-item text-muted small">ไม่พบอุปกรณ์ที่พร้อมเบิก</div>'
+      }
+
+      function nameKey(v) {
+        // ต้องตรงกับ normName_ ฝั่งเซิร์ฟเวอร์
+        return String(v || '')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .toLowerCase()
+      }
+
+      function renderPlaceSuggest() {
+        var box = document.getElementById('placeSuggest')
+        var inp = document.getElementById('locationAddress')
+        if (!box || !inp) return
+        var q = normNm(inp.value)
+        var mine = placesByUser[nameKey(getBorrowerName())] || []
+        var seen = {}
+        var list = []
+        mine.forEach(function (p) {
+          var k = normNm(p)
+          if (!seen[k]) {
+            seen[k] = 1
+            list.push({ t: p, mine: true })
+          }
+        })
+        placesList.forEach(function (p) {
+          var k = normNm(p)
+          if (!seen[k]) {
+            seen[k] = 1
+            list.push({ t: p, mine: false })
+          }
+        })
+        list = list
+          .filter(function (x) {
+            var k = normNm(x.t)
+            return k !== q && (!q || k.includes(q))
+          })
+          .slice(0, 8)
+        if (!list.length) {
+          box.innerHTML = ''
+          return
+        }
+        box.innerHTML =
+          '<div class="w-100 small text-muted">เลือกจากที่เคยใช้:</div>' +
+          list
+            .map(function (x) {
+              return (
+                '<button type="button" class="btn btn-sm ' +
+                (x.mine ? 'btn-outline-success' : 'btn-outline-secondary') +
+                ' rounded-pill" data-place="' +
+                escapeHtml(x.t) +
+                '"><i class="fa-solid ' +
+                (x.mine ? 'fa-clock-rotate-left' : 'fa-location-dot') +
+                ' me-1"></i>' +
+                escapeHtml(x.t) +
+                '</button>'
+              )
+            })
+            .join('')
+      }
+
+      document.addEventListener('click', function (e) {
+        var b = e.target.closest('#placeSuggest [data-place]')
+        if (!b) return
+        document.getElementById('locationAddress').value = b.dataset.place
+        renderPlaceSuggest()
+      })
+
+      function addCodeAndClear(code) {
+        var r = addToCart(code)
+        if (r.ok) beep()
+        toast(r.ok ? 'success' : 'warning', r.msg)
+        document.getElementById('borrowAssetSearch').value = ''
+        renderAssetSuggest()
+      }
+
+      function addFromSearch() {
+        var raw = document.getElementById('borrowAssetSearch').value
+        var q = normNm(raw)
+        if (!q) return
+        var list = availableAssets()
+        var exact = list.find(function (a) {
+          return normNm(a[3]) === q
+        })
+        if (exact) return addCodeAndClear(exact[3])
+        var hits = list.filter(function (a) {
+          return normNm(a[3]).includes(q) || normNm(a[4]).includes(q)
+        })
+        if (hits.length === 1) return addCodeAndClear(hits[0][3])
+        toast(
+          'warning',
+          hits.length ? 'พบหลายรายการ กรุณากดเลือก' : 'ไม่พบอุปกรณ์'
+        )
+      }
+
+      function onAssetSearchKey(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          addFromSearch()
+        }
+      }
+
+      document.addEventListener('click', function (e) {
+        var b = e.target.closest('#assetSuggest [data-sug]')
+        if (b) addCodeAndClear(b.dataset.sug)
+      })
+
+      function openBorrowModal(autoScan) {
+        document.getElementById('borrowForm').reset()
+        document.getElementById('borrowerSearch').value = ''
+        document.getElementById('borrowerList').innerHTML = ''
+
+        var _me = getOperator()
+        if (!pendingBorrowerTick && _me && borrowersList.indexOf(_me) >= 0) {
+          pendingBorrowerTick = _me
+        }
+        renderBorrowerOptions()
+        fillAssetSelect()
+        stopQrScanner()
+
+        if (selectedCodes && selectedCodes.size > 0) {
+          selectedCodes.forEach(function (code) {
+            addToCart(code)
+          })
+        }
+
+        renderCart()
+        borrowModal.show()
+        if (autoScan === true) setTimeout(startQrScanner, 500)
+      }
+
+      function openNamesModal() {
+        renamingName = ''
+        document.getElementById('newNameInput').value = ''
+        document.getElementById('nameManageSearch').value = ''
+        renderNamesManager()
+        bsModal('namesModal').show()
+      }
+
+      function initOperator() {
+        renderOperatorOptions()
+        var saved = ''
+        try {
+          saved = localStorage.getItem('btt_operator') || ''
+        } catch (e) {}
+        if (saved) {
+          var sel = document.getElementById('operatorSelect')
+          var inp = document.getElementById('operatorName')
+          var found = false
+          for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === saved) {
+              sel.selectedIndex = i
+              found = true
+              break
+            }
+          }
+          if (found) {
+            inp.classList.add('d-none')
+          } else {
+            sel.value = OP_OTHER
+            inp.classList.remove('d-none')
+            inp.value = saved
+          }
+        }
+      }
+
+      function getOperator() {
+        var sel = document.getElementById('operatorSelect')
+        var val = sel ? sel.value : ''
+        if (val === OP_OTHER) {
+          var inp = document.getElementById('operatorName')
+          return inp ? inp.value.trim() : ''
+        }
+        return val
+      }
+
+      function onOperatorChange() {
+        var sel = document.getElementById('operatorSelect')
+        var inp = document.getElementById('operatorName')
+        var isOther = sel.value === OP_OTHER
+        inp.classList.toggle('d-none', !isOther)
+        if (isOther) inp.focus()
+        saveOperator()
+      }
+
+      function saveOperator() {
+        var op = getOperator()
+        try {
+          localStorage.setItem('btt_operator', op)
+        } catch (e) {}
+      }
+
+      function toggleDarkMode() {
+        var on = document.body.classList.toggle('dark-mode')
+        document.getElementById('darkIcon').className = on
+          ? 'fa-solid fa-sun me-1'
+          : 'fa-solid fa-moon me-1'
+        try {
+          localStorage.setItem('btt_dark', on ? '1' : '0')
+        } catch (e) {}
+      }
+
+      function setTextTone(t) {
+        t = t || 'normal'
+        if (t === 'normal') document.body.removeAttribute('data-tone')
+        else document.body.setAttribute('data-tone', t)
+        var s = document.getElementById('toneSelect')
+        if (s) s.value = t
+        try {
+          localStorage.setItem('btt_tone', t)
+        } catch (e) {}
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        try {
+          if (localStorage.getItem('btt_dark') === '1') toggleDarkMode()
+          setTextTone(localStorage.getItem('btt_tone') || 'normal')
+        } catch (e) {}
+      })
+
+      function topBar(on) {
+        var b = document.getElementById('topBar')
+        if (b) b.classList.toggle('on', !!on)
+      }
+
+      var _ft
+      function filterAssetsDebounced() {
+        clearTimeout(_ft)
+        _ft = setTimeout(filterAssets, 200)
+      }
+
+      function loadData(doneMsg) {
+        if (!dataLoaded && !session.token) {
+          try {
+            var c = JSON.parse(localStorage.getItem('btt_data_cache') || 'null')
+            if (c && c.success) onDataLoaded(c, true)
+          } catch (e) {}
+        }
+        if (!dataLoaded)
+          Swal.fire({
+            title: 'กำลังโหลด...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+          })
+        topBar(true)
+        google.script.run
+          .withSuccessHandler(function (r) {
+            topBar(false)
+            if (Swal.isVisible() && Swal.isLoading()) Swal.close()
+            onDataLoaded(r)
+            if (r && r.success && typeof doneMsg === 'string')
+              toast('success', doneMsg)
+          })
+          .withFailureHandler(function (err) {
+            topBar(false)
+            onError(err)
+          })
+          .getInitialData(session.token)
+      }
+
+      function onDataLoaded(res, fromCache) {
+        dataLoaded = true
+        if (!res || !res.success) {
+          Swal.fire(
+            'ข้อผิดพลาด',
+            res ? res.message : 'ดึงข้อมูลไม่สำเร็จ',
+            'error'
+          )
+          return
+        }
+        if (!fromCache) {
+          var wasIn = !!session.token
+          setSession(
+            res.role && res.role !== 'USER'
+              ? { token: session.token, role: res.role, name: res.name }
+              : {}
+          )
+          if (wasIn && !session.token) toast('warning', 'หมดเวลาเข้าสู่ระบบ')
+          if (!session.token) {
+            try {
+              localStorage.setItem('btt_data_cache', JSON.stringify(res))
+            } catch (e) {}
+          }
+        }
+        globalAssets = res.assets || []
+        globalBorrows = res.borrows || []
+        globalAudit = res.audit || []
+        appUrl = res.appUrl || ''
+        tgGroupUrl = res.tgGroupUrl || ''
+        borrowersList = res.borrowers || []
+        categoriesList = res.categories || []
+        locationsList = res.locations || []
+        placesList = res.places || []
+        placesByUser = res.placesByUser || {}
+        lastRet = res.lastRet || {}
+
+        renderOperatorOptions()
+        renderCategoryFilter()
+
+        document.getElementById('statTotal').innerText = res.summary
+          ? res.summary.total
+          : globalAssets.length
+        document.getElementById('statAvailable').innerText = res.summary
+          ? res.summary.available
+          : 0
+        document.getElementById('statBorrowed').innerText = res.summary
+          ? res.summary.borrowed
+          : 0
+        var statUnv = document.getElementById('statUnavailable')
+        if (statUnv)
+          statUnv.innerText = res.summary ? res.summary.unavailable : 0
+        var statLow = document.getElementById('statLowStock')
+        if (statLow)
+          statLow.innerText = res.summary ? res.summary.lowStockCount : 0
+
+        filterAssets()
+        renderBorrowTable(globalBorrows)
+        renderLogTable(res.logs || [])
+        renderAudit()
+
+        if (typeof renderContact === 'function' && res.contact)
+          renderContact(res.contact)
+
+        var btnSheet = document.getElementById('btnOpenSheet')
+        if (btnSheet && res.sheetUrl) {
+          btnSheet.href = res.sheetUrl
+          btnSheet.style.display = 'inline-block'
+        }
+      }
+
+      function reloadThen(msg) {
+        loadData(msg)
+      }
+
+      function auditByRow(row) {
+        return globalAudit.find(r => String(r[5]) === String(row))
+      }
+
+      function renderAudit() {
+        const f = document.getElementById('auditFilter').value
+        const q = (document.getElementById('auditSearch').value || '')
+          .trim()
+          .toLowerCase()
+        const rows = globalAudit.filter(r => {
+          if (f && r[0] !== f) return false
+          return !q || r.slice(0, 5).join(' ').toLowerCase().includes(q)
+        })
+        const pending = globalAssets.filter(a => /^NEW-/i.test(a[3])).length
+        document.getElementById('auditSummary').innerText =
+          'รายการในรายงาน ' +
+          globalAudit.length +
+          ' | รหัสชั่วคราว (NEW-) ' +
+          pending +
+          ' รายการ'
+        document.getElementById('auditIssueList').innerHTML = [
+          ...new Set(globalAudit.map(r => r[0]).filter(Boolean))
+        ]
+          .map(i => '<option value="' + escapeHtml(i) + '">')
+          .join('')
+        const tb = document.getElementById('auditTableBody')
+        if (!rows.length) {
+          tb.innerHTML =
+            '<tr><td colspan="6" class="text-center py-4 text-muted">ไม่มีข้อมูล</td></tr>'
+          return
+        }
+        tb.innerHTML = rows
+          .map(r => {
+            const code = String(r[2] || '').trim()
+            const exists = code && !!assetByCode(code)
+            const rid = escapeHtml(r[5])
+            const btnAsset = exists
+              ? '<button class="btn btn-sm btn-outline-primary me-1" data-act="asset" data-code="' +
+                escapeHtml(code) +
+                '" title="แก้ไข"><i class="fa-solid fa-screwdriver-wrench"></i></button>'
+              : '<button class="btn btn-sm btn-outline-success me-1" data-act="create" data-row="' +
+                rid +
+                '" title="เพิ่ม"><i class="fa-solid fa-circle-plus"></i></button>'
+            return (
+              '<tr><td>' +
+              escapeHtml(r[0]) +
+              '</td><td>' +
+              escapeHtml(r[1]) +
+              '</td><td class="fw-bold">' +
+              escapeHtml(r[2]) +
+              '</td><td>' +
+              escapeHtml(r[3]) +
+              '</td><td><small>' +
+              escapeHtml(r[4]) +
+              '</small></td><td class="text-nowrap text-center">' +
+              btnAsset +
+              '<button class="btn btn-sm btn-outline-secondary me-1" data-act="auditEdit" data-row="' +
+              rid +
+              '"><i class="fa-solid fa-pen"></i></button><button class="btn btn-sm btn-outline-danger" data-act="auditDel" data-row="' +
+              rid +
+              '"><i class="fa-solid fa-trash"></i></button></td></tr>'
+            )
+          })
+          .join('')
+      }
+
+      function openAuditModal(row) {
+        const r = row ? auditByRow(row) : null
+        const set = (id, v) => (document.getElementById(id).value = v || '')
+        set('auditRow', r ? r[5] : '')
+        set('auditExpectCode', r ? r[2] : '')
+        set('auditExpectName', r ? r[3] : '')
+        set('auditIssue', r ? r[0] : '')
+        set('auditSource', r ? r[1] : '')
+        set('auditCode', r ? r[2] : '')
+        set('auditName', r ? r[3] : '')
+        set('auditDetail', r ? r[4] : '')
+        document.getElementById('auditModalTitle').innerText = r
+          ? 'แก้ไขรายการตรวจสอบ'
+          : 'เพิ่มรายการ'
+        bsModal('auditModal').show()
+      }
+
+      function handleAuditSubmit(e) {
+        e.preventDefault()
+        const v = id => document.getElementById(id).value
+        const p = {
+          row: v('auditRow'),
+          expectCode: v('auditExpectCode'),
+          expectName: v('auditExpectName'),
+          issue: v('auditIssue'),
+          source: v('auditSource'),
+          code: v('auditCode'),
+          name: v('auditName'),
+          detail: v('auditDetail')
+        }
+        Swal.fire({
+          title: 'กำลังบันทึก...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        })
+        const run = google.script.run
+          .withSuccessHandler(res => {
+            if (res && res.success) {
+              bsModal('auditModal').hide()
+              reloadThen(res.message)
+            } else {
+              Swal.close()
+              Swal.fire('ข้อผิดพลาด', res ? res.message : 'ไม่สำเร็จ', 'error')
+            }
+          })
+          .withFailureHandler(onError)
+        p.token = session.token
+        if (p.row) run.updateAuditRow(p, getOperator())
+        else run.addAuditRow(p, getOperator())
+      }
+
+      function deleteAuditItem(row) {
+        const r = auditByRow(row)
+        if (!r) return
+        Swal.fire({
+          title: 'ลบรายการ?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'ลบ',
+          confirmButtonColor: '#dc3545'
+        }).then(res => {
+          if (!res.isConfirmed) return
+          google.script.run
+            .withSuccessHandler(out => {
+              if (out && out.success) reloadThen(out.message)
+              else Swal.fire('ข้อผิดพลาด', out ? out.message : '', 'error')
+            })
+            .withFailureHandler(onError)
+            .deleteAuditRow(r[5], r[2], r[3], getOperator(), session.token)
+        })
+      }
+
+      function createAssetFromAudit(row) {
+        const r = auditByRow(row)
+        if (!r) return
+        openAssetModal()
+        pendingAuditRow = String(r[5])
+        document.getElementById('assetId').value = String(r[2] || '').trim()
+        document.getElementById('assetName').value = r[3] || ''
+        document.getElementById('assetRemark').value = r[1]
+          ? 'นำเข้าจากชีต ' + r[1]
+          : ''
+      }
+
+      function activeCountByName(name) {
+        return globalBorrows.filter(
+          r => r[8] === 'กำลังยืม' && normNm(r[6]) === normNm(name)
+        ).length
+      }
+
+      function renderNamesManager() {
+        const box = document.getElementById('namesManageList')
+        if (!box) return
+        const q = document
+          .getElementById('nameManageSearch')
+          .value.trim()
+          .toLowerCase()
+        const names = borrowersList.filter(
+          n => !q || n.toLowerCase().includes(q)
+        )
+        document.getElementById('nameManageCount').innerText =
+          'ทั้งหมด ' + borrowersList.length + ' ชื่อ'
+        if (!names.length) {
+          box.innerHTML =
+            '<div class="list-group-item text-center text-muted small">ไม่พบชื่อ</div>'
+          return
+        }
+        box.innerHTML = names
+          .map(n => {
+            const en = escapeHtml(n)
+            if (n === renamingName)
+              return (
+                '<div class="list-group-item d-flex align-items-center gap-2"><input type="text" class="form-control form-control-sm" id="renameInput" value="' +
+                en +
+                '"><button type="button" class="btn btn-sm btn-btt" data-name-act="save" data-name="' +
+                en +
+                '"><i class="fa-solid fa-check"></i></button><button type="button" class="btn btn-sm btn-outline-secondary" data-name-act="cancel"><i class="fa-solid fa-xmark"></i></button></div>'
+              )
+            const cnt = activeCountByName(n)
+            return (
+              '<div class="list-group-item d-flex align-items-center gap-2"><div class="flex-grow-1"><span>' +
+              en +
+              '</span>' +
+              (cnt
+                ? ' <span class="badge bg-warning text-dark ms-1">ยืม ' +
+                  cnt +
+                  '</span>'
+                : '') +
+              '</div><button type="button" class="btn btn-sm btn-outline-primary" data-name-act="rename" data-name="' +
+              en +
+              '"><i class="fa-solid fa-pen"></i></button><button type="button" class="btn btn-sm btn-outline-danger" data-name-act="del" data-name="' +
+              en +
+              '"><i class="fa-solid fa-trash"></i></button></div>'
+            )
+          })
+          .join('')
+      }
+
+      function nameCall(fn, args, after) {
+        Swal.fire({
+          title: 'กำลังบันทึก...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        })
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res && res.success) {
+              if (after) after()
+              reloadThen(res.message)
+            } else Swal.fire('ข้อผิดพลาด', res ? res.message : '', 'error')
+          })
+          .withFailureHandler(onError)
+          [fn](...args, session.token)
+      }
+
+      function addNameFromInput() {
+        const inp = document.getElementById('newNameInput')
+        const name = inp.value.trim()
+        if (!name) return
+        nameCall('addBorrowerName', [name, getOperator()], () => {
+          inp.value = ''
+        })
+      }
+
+      function saveRename(oldName) {
+        const inp = document.getElementById('renameInput')
+        const nv = inp ? inp.value.trim() : ''
+        if (!nv) return
+        if (nv === oldName) {
+          renamingName = ''
+          renderNamesManager()
+          return
+        }
+        nameCall('renameBorrowerName', [oldName, nv, getOperator()], () => {
+          renamingName = ''
+        })
+      }
+
+      function deleteNameItem(name) {
+        if (activeCountByName(name)) {
+          Swal.fire('ลบไม่ได้', 'ยังมีรายการค้างยืมอยู่', 'warning')
+          return
+        }
+        Swal.fire({
+          title: 'ลบชื่อนี้?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'ลบ',
+          confirmButtonColor: '#dc3545'
+        }).then(res => {
+          if (res.isConfirmed)
+            nameCall('deleteBorrowerName', [name, getOperator()])
+        })
+      }
+
+      function addOperatorName() {
+        const name = document.getElementById('operatorName').value.trim()
+        if (!name) return
+        nameCall('addBorrowerName', [name, name])
+      }
+
+      function addBorrowerFromForm() {
+        const inp = document.getElementById('borrowerName')
+        const name = inp.value.trim()
+        if (!name) return
+        nameCall('addBorrowerName', [name, getOperator() || name], () => {
+          pendingBorrowerTick = name
+          inp.value = ''
+        })
+      }
+
+      let contactInfo = {}
+      function safeUrl(u) {
+        return /^https?:\/\//i.test(String(u || '').trim()) ? u : ''
+      }
+      function contactRow(color, icon, label, value, href, copyVal) {
+        const web = /^https?:/i.test(href || '')
+        return (
+          '<div class="ct-row"><div class="ct-ico" style="background:' +
+          color +
+          '"><i class="' +
+          icon +
+          '"></i></div><div class="ct-txt"><small>' +
+          escapeHtml(label) +
+          '</small><div>' +
+          escapeHtml(value) +
+          '</div></div><div class="ct-act">' +
+          (href
+            ? '<a class="btn btn-sm btn-light" href="' +
+              escapeHtml(href) +
+              '"' +
+              (web ? ' target="_blank" rel="noopener"' : '') +
+              '><i class="fa-solid fa-arrow-up-right-from-square"></i></a>'
+            : '') +
+          (copyVal
+            ? '<button type="button" class="btn btn-sm btn-outline-light" data-copy="' +
+              escapeHtml(copyVal) +
+              '" onclick="copyContact(this)"><i class="regular fa-copy"></i></button>'
+            : '') +
+          '</div></div>'
+        )
+      }
+
+      function renderContact(c) {
+        c = contactInfo = c || {}
+        const lineUrl = safeUrl(c.LINE_URL)
+        const qr =
+          safeUrl(c.QR_IMAGE) ||
+          (lineUrl
+            ? 'https://quickchart.io/qr?size=300&margin=1&text=' +
+              encodeURIComponent(lineUrl)
+            : '')
+        document.getElementById('ctName').innerText =
+          c.NAME || 'ติดต่อผู้ดูแลระบบ'
+        document.getElementById('ctTitle').innerText = c.TITLE || ''
+        document.getElementById('ctNote').innerText = c.NOTE || ''
+        document.getElementById('ctHours').innerHTML = c.HOURS
+          ? '<i class="regular fa-clock me-1"></i>' + escapeHtml(c.HOURS)
+          : ''
+        document.getElementById('ctQr').innerHTML = qr
+          ? '<img src="' + escapeHtml(qr) + '" alt="LINE QR">'
+          : '<div class="ct-noqr">ยังไม่ได้ตั้งค่า LINE</div>'
+        document.getElementById('ctScan').style.display = qr ? '' : 'none'
+
+        let rows = ''
+        if (c.LINE_ID || lineUrl)
+          rows += contactRow(
+            '#06c755',
+            'fa-brands fa-line',
+            'LINE',
+            c.LINE_ID || 'เพิ่มเพื่อน',
+            lineUrl,
+            c.LINE_ID
+          )
+        if (c.PHONE)
+          rows += contactRow(
+            '#0ea5e9',
+            'fa-solid fa-phone',
+            'โทรศัพท์',
+            c.PHONE,
+            'tel:' + c.PHONE,
+            c.PHONE
+          )
+        if (c.EMAIL)
+          rows += contactRow(
+            '#f59e0b',
+            'fa-solid fa-envelope',
+            'อีเมล',
+            c.EMAIL,
+            'mailto:' + c.EMAIL,
+            c.EMAIL
+          )
+        document.getElementById('ctRows').innerHTML =
+          rows || '<div class="ct-empty">ยังไม่ได้ตั้งค่าติดต่อ</div>'
+      }
+
+      var tgGroupUrl = ''
+
+      function openTgModal() {
+        var url = safeUrl(tgGroupUrl)
+        if (!url) {
+          Swal.fire('ยังไม่ได้ตั้งลิงก์กลุ่ม', 'กรุณาแจ้งผู้ดูแลระบบ', 'info')
+          return
+        }
+        document.getElementById('tgJoinBtn').href = url
+        document.getElementById('tgQr').innerHTML =
+          '<img src="https://quickchart.io/qr?size=300&margin=1&text=' +
+          encodeURIComponent(url) +
+          '" alt="Telegram QR">'
+        bsModal('tgModal').show()
+      }
+
+      function copyTgLink() {
+        navigator.clipboard.writeText(tgGroupUrl || '').then(function () {
+          toast('success', 'คัดลอกลิงก์แล้ว')
+        })
+      }
+
+      function openContactModal() {
+        bsModal('contactModal').show()
+      }
+      function copyContact(btn) {
+        navigator.clipboard
+          .writeText(btn.dataset.copy || '')
+          .then(() => toast('success', 'คัดลอกแล้ว'))
+      }
+
+      function syncOperatorDelBtn() {
+        var btnDel = document.getElementById('btnDelOperator')
+        if (btnDel) {
+          var v = document.getElementById('operatorSelect').value
+          btnDel.classList.toggle('d-none', !v || v === OP_OTHER)
+        }
+      }
+
+      function deleteSelectedOperator() {
+        const v = document.getElementById('operatorSelect').value
+        if (!v || v === OP_OTHER) return
+        deleteNameItem(v)
+      }
+
+      function bindExtraActions() {
+        const bl = document.getElementById('borrowerList')
+        if (bl) {
+          bl.addEventListener(
+            'click',
+            e => {
+              const b = e.target.closest('.name-del')
+              if (!b) return
+              e.preventDefault()
+              e.stopPropagation()
+              deleteNameItem(b.dataset.delName)
+            },
+            true
+          )
+        }
+        const ab = document.getElementById('auditTableBody')
+        if (ab) {
+          ab.addEventListener('click', e => {
+            const t = e.target.closest('[data-act]')
+            if (!t) return
+            const a = t.dataset.act
+            if (a === 'asset') editAsset(t.dataset.code)
+            else if (a === 'create') createAssetFromAudit(t.dataset.row)
+            else if (a === 'auditEdit') openAuditModal(t.dataset.row)
+            else if (a === 'auditDel') deleteAuditItem(t.dataset.row)
+          })
+        }
+        const nb = document.getElementById('namesManageList')
+        if (nb) {
+          nb.addEventListener('click', e => {
+            const t = e.target.closest('[data-name-act]')
+            if (!t) return
+            const n = t.dataset.name,
+              a = t.dataset.nameAct
+            if (a === 'rename') {
+              renamingName = n
+              renderNamesManager()
+            } else if (a === 'cancel') {
+              renamingName = ''
+              renderNamesManager()
+            } else if (a === 'save') saveRename(n)
+            else if (a === 'del') deleteNameItem(n)
+          })
+        }
+      }
+
+      function toggleStatusFilter() {
+        statusFilterOn = !statusFilterOn
+        document
+          .getElementById('cardUnavailable')
+          .classList.toggle('active', statusFilterOn)
+        filterAssets()
+      }
+
+      // ฟังก์ชันทำความสะอาดรหัสเพื่อการเปรียบเทียบที่แม่นยำ (ตัดช่องว่างทั้งหมดและแปลงเป็นตัวพิมพ์เล็ก)
+      function cleanCode(code) {
+        return String(code || '')
+          .replace(/\s+/g, '')
+          .trim()
+          .toLowerCase()
+      }
+
+      // ฟังก์ชันค้นหาและกรองข้อมูลหลัก (รองรับรหัสมี/ไม่มีเว้นวรรค)
+      function filterAssets() {
+        var searchInput = document.getElementById('searchInput')
+        var categoryFilter = document.getElementById('categoryFilter')
+
+        var q = String(searchInput ? searchInput.value : '')
+          .trim()
+          .toLowerCase()
+        var qClean = cleanCode(q)
+        var cat = categoryFilter ? categoryFilter.value : ''
+
+        if (!globalAssets || !Array.isArray(globalAssets)) {
+          return
+        }
+
+        const filtered = globalAssets.filter(function (item) {
+          if (!item) return false
+
+          const rawCode = String(item[3] || '')
+          const itemCodeClean = cleanCode(rawCode)
+          const name = String(item[4] || '').toLowerCase()
+          const itemCat = String(item[5] || '')
+          const itemStatus = String(item[13] || '').trim()
+          const totalStock = Number(item[12]) || 0
+          const minStock = Number(item[8]) || 0
+
+          // ค้นหาเจอทั้งแบบพิมพ์ตรงๆ หรือแบบตัดช่องว่างออกเทียบกัน
+          const matchSearch =
+            itemCodeClean.includes(qClean) ||
+            rawCode.toLowerCase().includes(q) ||
+            name.includes(q)
+          const matchCat = cat === '' || itemCat === cat
+
+          let matchCard = true
+          if (activeCardFilter === 'พร้อมใช้งาน') {
+            matchCard = itemStatus === 'พร้อมใช้งาน'
+          } else if (activeCardFilter === 'ถูกยืม') {
+            matchCard = itemStatus === 'ถูกยืม'
+          } else if (activeCardFilter === 'lowStock') {
+            matchCard = totalStock <= minStock
+          } else if (activeStatusFilter) {
+            matchCard = itemStatus === activeStatusFilter
+          }
+
+          return matchSearch && matchCat && matchCard
+        })
+
+        renderAssetTable(filtered)
+      }
+
+      // ฟังก์ชันคลิกการ์ดชำรุด / ส่งซ่อม
+      function setStatusFilter(status) {
+        if (activeStatusFilter === status) {
+          activeStatusFilter = '' // คลิกซ้ำเพื่อยกเลิกตัวกรอง
+        } else {
+          activeStatusFilter = status
+          activeCardFilter = ''
+        }
+
+        var cardRepair = document.getElementById('cardRepair')
+        var cardFixing = document.getElementById('cardFixing')
+        if (cardRepair)
+          cardRepair.classList.toggle('active', activeStatusFilter === 'ชำรุด')
+        if (cardFixing)
+          cardFixing.classList.toggle(
+            'active',
+            activeStatusFilter === 'ส่งซ่อม'
+          )
+
+          // ล้างไฮไลต์การ์ดอื่น
+        ;['cardTotal', 'cardAvailable', 'cardBorrowed', 'cardLowStock'].forEach(
+          function (id) {
+            var el = document.getElementById(id)
+            if (el) el.classList.remove('active')
+          }
+        )
+
+        filterAssets()
+      }
+
+      // ฟังก์ชันคลิกการ์ดสรุปยอดอื่นๆ
+      function filterByCard(filterType) {
+        if (activeCardFilter === filterType) {
+          activeCardFilter = ''
+        } else {
+          activeCardFilter = filterType
+          activeStatusFilter = ''
+        }
+
+        // ล้างไฮไลต์การ์ดชำรุด/ส่งซ่อม
+        ;['cardRepair', 'cardFixing'].forEach(function (id) {
+          var el = document.getElementById(id)
+          if (el) el.classList.remove('active')
+        })
+
+        // สลับไฮไลต์การ์ดที่เลือก
+        ;['cardTotal', 'cardAvailable', 'cardBorrowed', 'cardLowStock'].forEach(
+          function (id) {
+            var el = document.getElementById(id)
+            if (el) {
+              var match = false
+              if (id === 'cardTotal' && activeCardFilter === 'total')
+                match = true
+              if (id === 'cardAvailable' && activeCardFilter === 'พร้อมใช้งาน')
+                match = true
+              if (id === 'cardBorrowed' && activeCardFilter === 'ถูกยืม')
+                match = true
+              if (id === 'cardLowStock' && activeCardFilter === 'lowStock')
+                match = true
+              el.classList.toggle('active', match)
+            }
+          }
+        )
+
+        filterAssets()
+      }
+
+      function toggleSelectAll(master) {
+        document.querySelectorAll('.asset-checkbox').forEach(cb => {
+          cb.checked = master.checked
+          toggleSelectCode(cb.value, master.checked)
+        })
+      }
+
+      function toggleSelectCode(code, isChecked) {
+        if (isChecked) selectedCodes.add(code)
+        else selectedCodes.delete(code)
+      }
+
+      function printSelectedQRCodes() {
+        if (selectedCodes.size === 0) {
+          Swal.fire('คำเตือน', 'กรุณาเลือกรายการอย่างน้อย 1 รายการ', 'warning')
+          return
+        }
+        let cardsHtml =
+          '<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>พิมพ์ QR Code</title><style>body{font-family:Prompt,sans-serif;margin:0;padding:20px;background:#fff}.grid{display:flex;flex-wrap:wrap;gap:15px}.card{border:1px dashed #999;padding:10px;border-radius:6px;width:140px;display:flex;flex-direction:column;align-items:center;text-align:center;page-break-inside:avoid;margin-bottom:15px}.card img{width:90px;height:90px;margin-bottom:5px}.title{font-size:11px;font-weight:600;line-height:1.2;margin-bottom:3px;color:#000}.code{font-size:10px;color:#333;font-weight:bold}</style></head><body><div class="grid">'
+        selectedCodes.forEach(code => {
+          const item = globalAssets.find(r => String(r[3]) === String(code))
+          const itemName = item ? item[4] : ''
+          const qrUrl =
+            'https://quickchart.io/qr?size=150&text=' +
+            encodeURIComponent(qrText(code))
+          cardsHtml +=
+            '<div class="card"><img src="' +
+            qrUrl +
+            '"><div class="title">' +
+            escapeHtml(itemName) +
+            '</div><div class="code">' +
+            escapeHtml(code) +
+            '</div></div>'
+        })
+        cardsHtml +=
+          '</div><script>window.onload=function(){setTimeout(function(){window.print();},500);}<\/script></body></html>'
+        const blob = new Blob([cardsHtml], { type: 'text/html;charset=utf-8' })
+        window.open(URL.createObjectURL(blob), '_blank')
+      }
+
+      function escapeHtml(text) {
+        if (!text) return ''
+        return String(text)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;')
+      }
+
+      function editAsset(code) {
+        pendingAuditRow = ''
+        const item = globalAssets.find(r => String(r[3]) === String(code))
+        if (!item) return
+        const set = (id, v) => (document.getElementById(id).value = v)
+        set('oldAssetId', item[3])
+        set('assetId', item[3])
+        set('assetName', item[4])
+        set('assetCategory', item[5] || '')
+        set('assetLocation', item[6] || '')
+        set('assetMin', item[8] || 0)
+        set('assetPrice', item[9] || 0)
+        set('assetBtt', item[10] || 0)
+        set('assetTke', item[11] || 0)
+        set('assetStatus', item[13] || 'พร้อมใช้งาน')
+        set('assetRemark', item[15] || '')
+        set('assetImageUrl', '')
+        var rawImg = String(item[2] || '').trim()
+        var urls = rawImg
+          .split(',')
+          .map(u => u.trim())
+          .filter(u => u !== '')
+        document.getElementById('imagePreview').src =
+          urls.length > 0
+            ? urls[0]
+            : 'https://placehold.co/150x150?text=No+Image'
+        document.getElementById('assetModalTitle').innerText =
+          'แก้ไขข้อมูลอุปกรณ์'
+        document.getElementById('imgAddWrap').classList.remove('d-none')
+        stagedPics = []
+        renderStaged()
+        assetModal.show()
+        loadPicManager(item[3])
+      }
+
+      var stagedPics = []
+      var savingAsset = false
+      var MAX_STAGED = 8
+
+      function gsRun(fn) {
+        var args = Array.prototype.slice.call(arguments, 1)
+        return new Promise(function (resolve, reject) {
+          var r = google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(reject)
+          r[fn].apply(r, args)
+        })
+      }
+
+      async function stagePics(files, input) {
+        var room = MAX_STAGED - stagedPics.length
+        if (room <= 0) {
+          input.value = ''
+          toast('warning', 'เลือกรูปได้สูงสุด ' + MAX_STAGED + ' รูป')
+          return
+        }
+        files = files.slice(0, room)
+        Swal.fire({
+          title: 'กำลังเตรียมรูป...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        })
+        for (var i = 0; i < files.length; i++) {
+          try {
+            stagedPics.push({
+              name: files[i].name,
+              dataUrl: await resizeToJpeg(files[i])
+            })
+          } catch (e) {}
+        }
+        Swal.close()
+        input.value = ''
+        renderStaged()
+      }
+
+      function renderStaged() {
+        var box = document.getElementById('stagedPics')
+        if (!box) return
+        var prev = document.getElementById('imagePreview')
+        if (!stagedPics.length) {
+          box.classList.add('d-none')
+          box.innerHTML = ''
+          return
+        }
+        box.classList.remove('d-none')
+        prev.src = stagedPics[0].dataUrl
+        box.innerHTML =
+          '<div class="small fw-semibold mb-1">รูปเตรียมอัปโหลด <span class="badge bg-secondary">' +
+          stagedPics.length +
+          '</span></div><div class="d-flex flex-wrap gap-2 justify-content-center">' +
+          stagedPics
+            .map(
+              (p, i) =>
+                '<div class="position-relative border rounded p-1" style="width:78px"><img src="' +
+                p.dataUrl +
+                '" style="width:100%;height:64px;object-fit:cover;border-radius:4px"></div>'
+            )
+            .join('') +
+          '</div>'
+      }
+
+      async function handleAssetSubmit(e) {
+        e.preventDefault()
+        if (savingAsset) return
+        savingAsset = true
+        var btn = document.getElementById('btnSaveAsset')
+        btn.disabled = true
+        var staged = stagedPics.slice()
+        try {
+          var formObj = {}
+          new FormData(document.getElementById('assetForm')).forEach(
+            (value, key) => (formObj[key] = value)
+          )
+          formObj.operator = getOperator()
+          formObj.token = session.token
+          formObj.auditRow = pendingAuditRow
+
+          Swal.fire({
+            title: 'กำลังบันทึก...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+          })
+          var res = await gsRun('saveAssetData', formObj)
+          if (!res || !res.success) {
+            Swal.close()
+            Swal.fire('ข้อผิดพลาด', res ? res.message : '', 'error')
+            return
+          }
+
+          var code = String(res.code || formObj.assetId || '').trim()
+          for (var i = 0; i < staged.length; i++) {
+            await gsRun(
+              'uploadImageToGitHub',
+              staged[i].dataUrl,
+              code,
+              getOperator(),
+              session.token,
+              'add'
+            )
+          }
+          stagedPics = []
+          assetModal.hide()
+          Swal.close()
+          Swal.fire('สำเร็จ', res.message, 'success')
+          loadData()
+        } catch (err) {
+          Swal.close()
+          onError(err)
+        } finally {
+          savingAsset = false
+          btn.disabled = false
+        }
+      }
+
+      function resizeToJpeg(file) {
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader()
+          reader.onerror = reject
+          reader.onload = function (e) {
+            var img = new Image()
+            img.onerror = reject
+            img.onload = function () {
+              var max = 1024
+              var k = Math.min(1, max / Math.max(img.width, img.height))
+              var cv = document.createElement('canvas')
+              cv.width = Math.round(img.width * k)
+              cv.height = Math.round(img.height * k)
+              cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height)
+              resolve(cv.toDataURL('image/jpeg', 0.8))
+            }
+            img.src = e.target.result
+          }
+          reader.readAsDataURL(file)
+        })
+      }
+
+      async function handleImageUpload(input) {
+        var files = Array.prototype.slice.call(input.files || [])
+        if (!files.length) return
+        if (!document.getElementById('oldAssetId').value) {
+          await stagePics(files, input)
+          return
+        }
+        var code = document.getElementById('oldAssetId').value.trim()
+        Swal.fire({
+          title: 'กำลังอัปโหลด...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        })
+        for (var i = 0; i < files.length; i++) {
+          var dataUrl = await resizeToJpeg(files[i])
+          await gsRun(
+            'uploadImageToGitHub',
+            dataUrl,
+            code,
+            getOperator(),
+            session.token,
+            'add'
+          )
+        }
+        input.value = ''
+        Swal.close()
+        loadPicManager(code)
+        loadData()
+        toast('success', 'อัปโหลดรูปสำเร็จ')
+      }
+
+      function loadPicManager(code) {
+        var box = document.getElementById('picManager'),
+          grid = document.getElementById('picGrid')
+        if (!box || !grid || !can('ADMIN')) {
+          box.classList.add('d-none')
+          return
+        }
+        box.classList.remove('d-none')
+        google.script.run
+          .withSuccessHandler(res => {
+            if (!res || !res.success) return
+            var pics = res.pics || []
+            document.getElementById('picCount').textContent = pics.length
+            grid.innerHTML = pics
+              .map(
+                p =>
+                  '<div class="position-relative border rounded p-1" style="width:64px"><img src="' +
+                  escapeHtml(p.url) +
+                  '" style="width:100px;height:50px;object-fit:cover;border-radius:4px"></div>'
+              )
+              .join('')
+          })
+          .listAssetPics(code, session.token)
+      }
+
+      function deleteAsset(code) {
+        Swal.fire({
+          title: 'ยืนยันการลบ?',
+          text: 'ลบอุปกรณ์ ' + code + '?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'ลบ',
+          confirmButtonColor: '#dc3545'
+        }).then(result => {
+          if (result.isConfirmed) {
+            Swal.fire({
+              title: 'กำลังลบ...',
+              allowOutsideClick: false,
+              didOpen: () => Swal.showLoading()
+            })
+            google.script.run
+              .withSuccessHandler(res => {
+                Swal.close()
+                if (res.success) {
+                  Swal.fire('สำเร็จ', res.message, 'success')
+                  loadData()
+                } else {
+                  Swal.fire('ข้อผิดพลาด', res.message, 'error')
+                }
+              })
+              .withFailureHandler(onError)
+              .deleteAssetData(code, getOperator(), session.token, true)
+          }
+        })
+      }
+
+      function loadCart() {
+        try {
+          cart = JSON.parse(localStorage.getItem('btt_cart') || '[]')
+        } catch (e) {
+          cart = []
+        }
+      }
+      function saveCart() {
+        try {
+          localStorage.setItem('btt_cart', JSON.stringify(cart))
+        } catch (e) {}
+      }
+
+      // ฟังก์ชันค้นหาอุปกรณ์จากรหัสแบบยืดหยุ่น (รองรับรหัสที่มีช่องว่างแตกต่างกัน)
+      function assetByCode(code) {
+        if (!globalAssets || !Array.isArray(globalAssets)) return null
+        var targetClean = cleanCode(code)
+        return globalAssets.find(function (a) {
+          return cleanCode(a[3]) === targetClean
+        })
+      }
+
+      var NOIMG_THUMB = 'https://placehold.co/150x150?text=No+Img'
+
+      function nameOfCode(code) {
+        var a = assetByCode(code)
+        return a ? String(a[4] || '') : ''
+      }
+
+      // รูปย่อของรหัสอุปกรณ์ (zoom = true คลิกแล้วขยายดูได้)
+      function thumbHtml(code, size, zoom) {
+        size = size || 44
+        var a = assetByCode(code)
+        var raw = a ? String(a[2] || '').trim() : ''
+        var url = raw ? raw.split(',')[0].trim() : ''
+        return (
+          '<img src="' +
+          escapeHtml(url || NOIMG_THUMB) +
+          '" loading="lazy" ' +
+          'class="code-thumb' +
+          (zoom ? ' zoom' : '') +
+          '" ' +
+          'style="width:' +
+          size +
+          'px;height:' +
+          size +
+          'px" ' +
+          'data-full="' +
+          escapeHtml(url) +
+          '" data-title="' +
+          escapeHtml(code) +
+          '" ' +
+          'onerror="this.onerror=null;this.src=\'' +
+          NOIMG_THUMB +
+          '\'">'
+        )
+      }
+
+      // คลิกรูปย่อเพื่อขยาย
+      document.addEventListener('click', function (e) {
+        var t = e.target.closest('.code-thumb.zoom')
+        if (!t || !t.dataset.full) return
+        e.preventDefault()
+        Swal.fire({
+          title: t.dataset.title,
+          imageUrl: t.dataset.full,
+          imageWidth: 320,
+          showCloseButton: true,
+          showConfirmButton: false
+        })
+      })
+
+      function addToCart(code) {
+        code = String(code || '').trim()
+        var a = assetByCode(code)
+        if (!a) return { ok: false, msg: 'ไม่พบรหัส ' + code }
+        var stock = Number(a[12]) || 0
+        if (a[13] !== 'พร้อมใช้งาน' || stock <= 0)
+          return { ok: false, msg: code + ' ไม่พร้อมเบิก' }
+        var it = cart.find(x => x.code === code)
+        if (it) {
+          if (it.qty >= stock) return { ok: false, msg: 'ครบจำนวนคงเหลือแล้ว' }
+          it.qty++
+        } else cart.push({ code: code, qty: 1 })
+        saveCart()
+        renderCart()
+        return {
+          ok: true,
+          msg: 'เพิ่ม ' + code + (a[6] ? ' 📍 ' + a[6] : '')
+        }
+      }
+
+      function renderCart() {
+        var box = document.getElementById('cartList')
+        if (!box) return
+        document.getElementById('cartCount').innerText = cart.length
+        var badge = document.getElementById('cartBadge')
+        if (badge) {
+          badge.innerText = cart.length
+          badge.style.display = cart.length ? 'inline-block' : 'none'
+        }
+        if (!cart.length) {
+          box.innerHTML =
+            '<div class="list-group-item text-center text-muted small py-3">ยังไม่มีรายการ</div>'
+          return
+        }
+        box.innerHTML = cart
+          .map(it => {
+            var a = assetByCode(it.code),
+              c = escapeHtml(it.code)
+            return (
+              '<div class="list-group-item d-flex align-items-center gap-2 py-2">' +
+              thumbHtml(it.code, 56, true) +
+              '<div class="flex-grow-1"><div class="fw-bold">' +
+              c +
+              '</div><small class="text-muted">' +
+              escapeHtml(a ? a[4] : '') +
+              '</small><div class="small text-success fw-semibold"><i class="fa-solid fa-location-dot me-1"></i>' +
+              escapeHtml(a && a[6] ? a[6] : 'ไม่ระบุที่เก็บ') +
+              '</div>' +
+              lastReturnHtml(it.code) +
+              '</div><button type="button" class="btn btn-sm btn-outline-secondary px-2" data-cart="dec" data-code="' +
+              c +
+              '">-</button><span class="fw-bold px-1">' +
+              it.qty +
+              '</span><button type="button" class="btn btn-sm btn-outline-secondary px-2" data-cart="inc" data-code="' +
+              c +
+              '">+</button><button type="button" class="btn btn-sm btn-outline-danger" data-cart="del" data-code="' +
+              c +
+              '"><i class="fa-solid fa-trash"></i></button></div>'
+            )
+          })
+          .join('')
+      }
+
+      function clearCart() {
+        cart = []
+        saveCart()
+        renderCart()
+      }
+
+      function bindCart() {
+        const cl = document.getElementById('cartList')
+        if (cl) {
+          cl.addEventListener('click', e => {
+            var t = e.target.closest('[data-cart]')
+            if (!t) return
+            var it = cart.find(x => x.code === t.dataset.code)
+            if (!it) return
+            var a = assetByCode(it.code),
+              stock = a ? Number(a[12]) || 0 : 0
+            if (t.dataset.cart === 'inc') it.qty = Math.min(stock, it.qty + 1)
+            else if (t.dataset.cart === 'dec') it.qty = it.qty - 1
+            else it.qty = 0
+            cart = cart.filter(x => x.qty >= 1)
+            saveCart()
+            renderCart()
+          })
+        }
+      }
+
+      function beep() {
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)()
+          var o = ctx.createOscillator()
+          o.frequency.value = 880
+          o.connect(ctx.destination)
+          o.start()
+          setTimeout(() => {
+            o.stop()
+            ctx.close()
+          }, 120)
+        } catch (e) {}
+      }
+
+      function toast(icon, msg) {
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: icon,
+          title: msg,
+          showConfirmButton: false,
+          timer: 1400
+        })
+      }
+
+      function saveAppUrlFromInput() {
+        var v = document.getElementById('appUrlInput').value
+        google.script.run
+          .withSuccessHandler(res => {
+            if (res.success) {
+              Swal.fire('สำเร็จ', res.message, 'success')
+              loadData()
+            }
+          })
+          .saveAppUrl(v, session.token)
+      }
+
+      function qrText(code) {
+        return appUrl ? appUrl + '?code=' + encodeURIComponent(code) : code
+      }
+
+      function startQrScanner() {
+        const readerDiv = document.getElementById('qr-reader'),
+          stopBtn = document.getElementById('btnStopScanner')
+        readerDiv.style.display = 'block'
+        stopBtn.style.display = 'block'
+        if (!html5QrCode) html5QrCode = new Html5Qrcode('qr-reader')
+        html5QrCode
+          .start(
+            { facingMode: 'environment' },
+            { fps: 10, qrbox: { width: 220, height: 220 } },
+            txt => onScanSuccess(txt),
+            () => {}
+          )
+          .catch(() => {
+            Swal.fire(
+              'เปิดกล้องไม่ได้',
+              'กรุณาอนุญาตกล้องในเบราว์เซอร์',
+              'info'
+            )
+            stopQrScanner()
+          })
+      }
+
+      function stopQrScanner() {
+        if (html5QrCode && html5QrCode.isScanning) {
+          html5QrCode
+            .stop()
+            .then(() => {
+              document.getElementById('qr-reader').style.display = 'none'
+              document.getElementById('btnStopScanner').style.display = 'none'
+            })
+            .catch(() => {})
+        } else {
+          document.getElementById('qr-reader').style.display = 'none'
+          document.getElementById('btnStopScanner').style.display = 'none'
+        }
+      }
+
+      function onScanSuccess(decodedText) {
+        var code = extractCode(decodedText),
+          now = Date.now()
+        if (code === lastScan.code && now - lastScan.t < 2000) return
+        lastScan = { code: code, t: now }
+        var r = addToCart(code)
+        if (r.ok) beep()
+        toast(r.ok ? 'success' : 'warning', r.msg)
+      }
+
+      function extractCode(text) {
+        var s = String(text).trim(),
+          m = /[?&]code=([^&#]+)/.exec(s)
+        return m ? decodeURIComponent(m[1]).trim() : s
+      }
+
+      function handleBorrowSubmit(e) {
+        e.preventDefault()
+        stopQrScanner()
+        if (!getBorrowerName()) {
+          Swal.fire('คำเตือน', 'กรุณาระบุชื่อผู้เบิก', 'warning')
+          return
+        }
+        if (!cart.length) {
+          Swal.fire('คำเตือน', 'ยังไม่มีรายการที่จะเบิก', 'warning')
+          return
+        }
+        var payload = {
+          borrowerName: getBorrowerName(),
+          projectName: document.getElementById('projectName').value,
+          locationAddress: document.getElementById('locationAddress').value,
+          operator: getOperator(),
+          token: session.token,
+          items: cart.map(it => ({ itemCode: it.code, quantity: it.qty }))
+        }
+        Swal.fire({
+          title: 'กำลังบันทึก...',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        })
+        google.script.run
+          .withSuccessHandler(res => {
+            Swal.close()
+            if (res.success) {
+              clearCart()
+              borrowModal.hide()
+              Swal.fire('สำเร็จ', res.message, 'success')
+              loadData()
+            } else Swal.fire('ข้อผิดพลาด', res.message, 'error')
+          })
+          .withFailureHandler(onError)
+          .saveBatchBorrowData(payload)
+      }
+
+      function returnAssetItem(itemCode, rowIndex) {
+        var row = globalBorrows.find(r => String(r[11]) === String(rowIndex))
+        var def = ''
+        if (row && borrowersList.indexOf(row[6]) >= 0) def = row[6]
+        var nameOpts = '<option value="">-- เลือกชื่อผู้คืน --</option>'
+        borrowersList.forEach(n => {
+          nameOpts +=
+            '<option value="' +
+            escapeHtml(n) +
+            '"' +
+            (n === def ? ' selected' : '') +
+            '>' +
+            escapeHtml(n) +
+            '</option>'
+        })
+
+        var ast = assetByCode(itemCode)
+        var homeLoc = ast ? String(ast[6] || '').trim() : ''
+        var locOpts = []
+        if (homeLoc) locOpts.push(homeLoc)
+        ;(locationsList || []).forEach(function (l) {
+          if (l && locOpts.indexOf(l) < 0) locOpts.push(l)
+        })
+        var locChips = locOpts
+          .slice(0, 10)
+          .map(function (l, i) {
+            var home = i === 0 && homeLoc && l === homeLoc
+            return (
+              '<button type="button" class="btn btn-sm ' +
+              (home ? 'btn-success' : 'btn-outline-secondary') +
+              ' rounded-pill m-1" data-v="' +
+              escapeHtml(l) +
+              '" onclick="document.getElementById(\'rtLoc\').value=this.dataset.v">' +
+              (home
+                ? '<i class="fa-solid fa-house me-1"></i>วางที่เดิม: '
+                : '') +
+              escapeHtml(l) +
+              '</button>'
+            )
+          })
+          .join('')
+
+        Swal.fire({
+          title: 'คืนอุปกรณ์ ' + itemCode,
+          html:
+            '<select id="rtWho" class="swal2-select m-0 w-100">' +
+            nameOpts +
+            '</select>' +
+            '<div class="text-start small fw-semibold mt-3">วางอุปกรณ์ไว้ที่ไหน *</div>' +
+            '<input id="rtLoc" class="swal2-input m-0 mt-1 w-100" autocomplete="off" placeholder="เช่น ห้อง A / ชั้น 2" value="">' +
+            '<div class="text-start mt-1">' +
+            locChips +
+            '</div>',
+          showCancelButton: true,
+          confirmButtonText: 'ยืนยันคืน',
+          confirmButtonColor: '#10b981',
+          preConfirm: () => {
+            var who = document.getElementById('rtWho').value
+            var loc = document.getElementById('rtLoc').value.trim()
+            if (!who) {
+              Swal.showValidationMessage('กรุณาเลือกชื่อผู้คืน')
+              return false
+            }
+            if (!loc) {
+              Swal.showValidationMessage('กรุณาระบุสถานที่ที่วางอุปกรณ์ไว้')
+              return false
+            }
+            return { who: who, loc: loc }
+          }
+        }).then(result => {
+          if (!result.isConfirmed) return
+          Swal.fire({
+            title: 'กำลังบันทึก...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+          })
+          google.script.run
+            .withSuccessHandler(res => {
+              Swal.close()
+              if (res.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'คืนสำเร็จ',
+                  timer: 1500,
+                  showConfirmButton: false
+                })
+                loadData()
+              } else Swal.fire('ข้อผิดพลาด', res.message, 'error')
+            })
+            .withFailureHandler(onError)
+            .returnAsset(
+              itemCode,
+              rowIndex,
+              result.value.who,
+              result.value.who,
+              session.token,
+              itemCode,
+              result.value.loc
+            )
+        })
+      }
+
+      function renderBorrowTable(borrows) {
+        var tbody = document.getElementById('borrowTableBody')
+        if (!tbody) return
+        var cb = document.getElementById('borrowOnlyActive')
+        var onlyActive = cb
+          ? cb.dataset.touched
+            ? cb.checked
+            : !can('ADMIN')
+          : false
+        if (cb) cb.checked = onlyActive
+        var bq = normNm(
+          (document.getElementById('borrowSearch') || {}).value || ''
+        )
+        borrows = borrows.filter(r => {
+          if (onlyActive && r[8] === 'คืนแล้ว') return false
+          return (
+            !bq ||
+            normNm(
+              [r[1], nameOfCode(r[1]), r[2], r[6], r[7], r[12]].join(' ')
+            ).indexOf(bq) >= 0
+          )
+        })
+        if (!borrows.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="12" class="text-center py-4 text-muted">ไม่พบประวัติ</td></tr>'
+          return
+        }
+        tbody.innerHTML = borrows
+          .map(row => {
+            var isReturned = row[8] === 'คืนแล้ว'
+            var badge = isReturned
+              ? '<span class="badge bg-success">คืนแล้ว</span>'
+              : '<span class="badge bg-warning text-dark">กำลังยืม</span>'
+            var btn = isReturned
+              ? '-'
+              : '<button class="btn btn-sm btn-outline-success" data-act="return" data-code="' +
+                escapeHtml(row[1]) +
+                '" data-row="' +
+                escapeHtml(row[11]) +
+                '"><i class="fa-solid fa-rotate-left me-1"></i> คืน</button>'
+            return (
+              '<tr><td>' +
+              escapeHtml(row[0]) +
+              '</td><td><div class="d-flex align-items-center gap-2">' +
+              thumbHtml(row[1], 48, true) +
+              '<div><div class="fw-bold">' +
+              escapeHtml(row[1]) +
+              '</div>' +
+              '<small class="text-muted">' +
+              escapeHtml(nameOfCode(row[1])) +
+              '</small></div></div>' +
+              '</td><td>' +
+              escapeHtml(row[2]) +
+              '</td><td>' +
+              escapeHtml(row[3]) +
+              '</td><td>' +
+              escapeHtml(row[6]) +
+              '</td><td>' +
+              escapeHtml(row[7]) +
+              '</td><td>' +
+              escapeHtml(row[4]) +
+              '</td><td>' +
+              escapeHtml(row[5]) +
+              '</td><td>' +
+              escapeHtml(row[12] || '-') +
+              '</td><td>' +
+              escapeHtml(row[13] || '-') +
+              '</td><td>' +
+              badge +
+              '</td><td>' +
+              btn +
+              '</td></tr>'
+            )
+          })
+          .join('')
+      }
+
+      function renderLogTable(logs) {
+        const tbody = document.getElementById('logTableBody')
+        if (!tbody) return
+        if (!logs.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="5" class="text-center py-4 text-muted">ไม่พบประวัติ</td></tr>'
+          return
+        }
+        tbody.innerHTML = logs
+          .map(
+            row =>
+              '<tr><td>' +
+              escapeHtml(row[0]) +
+              '</td><td><small>' +
+              escapeHtml(row[1]) +
+              '</small></td><td>' +
+              escapeHtml(row[2]) +
+              '</td><td><span class="badge bg-secondary">' +
+              escapeHtml(row[3]) +
+              '</span></td><td>' +
+              escapeHtml(row[4]) +
+              '</td></tr>'
+          )
+          .join('')
+      }
+
+      function openImageGallery(encodedUrls) {
+        var urls = decodeURIComponent(encodedUrls)
+          .split(',')
+          .map(u => u.trim())
+          .filter(u => u !== '')
+        document.getElementById('modalGalleryBody').innerHTML =
+          '<div class="d-flex flex-wrap justify-content-center gap-3 py-2">' +
+          (urls.length
+            ? urls
+                .map(
+                  url =>
+                    '<a href="' +
+                    escapeHtml(url) +
+                    '" target="_blank"><img src="' +
+                    escapeHtml(url) +
+                    '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 12px;" class="shadow-sm" onerror="this.onerror=null;this.src=\'https://placehold.co/150x150?text=No+Img\'"></a>'
+                )
+                .join('')
+            : '<p class="text-muted">ไม่มีรูปภาพ</p>') +
+          '</div>'
+        bsModal('imageGalleryModal').show()
+      }
+
+      function showQRModal(code, qrUrl) {
+        Swal.fire({
+          title: 'QR Code: ' + code,
+          imageUrl:
+            'https://quickchart.io/qr?size=200&text=' +
+            encodeURIComponent(qrText(code)),
+          imageWidth: 200,
+          imageHeight: 200,
+          showCloseButton: true,
+          confirmButtonText: 'พิมพ์รายการนี้'
+        }).then(res => {
+          if (res.isConfirmed) {
+            selectedCodes.clear()
+            selectedCodes.add(code)
+            printSelectedQRCodes()
+          }
+        })
+      }
+
+      function getClientId() {
+        var id = ''
+        try {
+          id = localStorage.getItem('btt_client_id') || ''
+        } catch (e) {}
+        if (!id) {
+          id =
+            'c' +
+            Math.random().toString(36).slice(2, 12) +
+            Date.now().toString(36)
+          try {
+            localStorage.setItem('btt_client_id', id)
+          } catch (e) {}
+        }
+        return id
+      }
+
+      function aiChipsFor() {
+        return can('ADMIN')
+          ? [
+              'สรุปภาพรวมคลังตอนนี้',
+              'ของอะไรใกล้หมด ต้องสั่งเพิ่ม?',
+              'ตอนนี้ใครยืมอะไรอยู่บ้าง?',
+              'มีรายการยืมค้างนานไหม?',
+              'สัปดาห์นี้มีการเบิกอะไรบ้าง?'
+            ]
+          : [
+              'ตอนนี้ใครยืมอะไรอยู่?',
+              'มีสว่านพร้อมใช้ไหม?',
+              'จะเจาะผนังคอนกรีตใช้อะไรดี?',
+              'วิธีเบิกอุปกรณ์ทำยังไง?'
+            ]
+      }
+
+      var aiHist = []
+      var aiBusy = false
+      var aiForUser = null
+
+      function aiFormat(t) {
+        var out = '',
+          inList = false
+        escapeHtml(t)
+          .split('\n')
+          .forEach(function (ln) {
+            var m = /^\s*(?:[-*\u2022]|\d+[.)])\s+(.*)$/.exec(ln)
+            if (m) {
+              if (!inList) {
+                out += '<ul>'
+                inList = true
+              }
+              out += '<li>' + m[1] + '</li>'
+            } else {
+              if (inList) {
+                out += '</ul>'
+                inList = false
+              }
+              if (ln.trim()) out += ln + '<br>'
+            }
+          })
+        if (inList) out += '</ul>'
+        return out
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/(<br>)+$/, '')
+      }
+
+      function aiAdd(role, text, cls) {
+        var box = document.getElementById('aiMsgs')
+        var d = document.createElement('div')
+        d.className = 'ai-b ' + role + (cls ? ' ' + cls : '')
+        if (role === 'a') d.innerHTML = aiFormat(text)
+        else d.textContent = text
+        box.appendChild(d)
+        box.scrollTop = box.scrollHeight
+        return d
+      }
+
+      function aiShowStart() {
+        var staff = can('ADMIN')
+        aiAdd(
+          'a',
+          staff
+            ? 'สวัสดีครับ ผมเป็นผู้ช่วยประจำระบบ ถามได้เลย เช่น สต็อกคงเหลือ ใครยืมอะไรอยู่ ประวัติเบิก-คืน ของใกล้หมด สถิติการเบิก หรือให้ช่วยหาอุปกรณ์ที่เหมาะกับงานก็ได้ครับ'
+            : 'สวัสดีครับ ผมเป็นผู้ช่วยประจำระบบ ถามได้เลย เช่น มีของไหม เหลือกี่ชิ้น เก็บที่ไหน ใครยืมอยู่ หรือให้ช่วยเลือกอุปกรณ์ให้เหมาะกับงานก็ได้ครับ'
+        )
+        var chips = document.getElementById('aiChips')
+        chips.innerHTML = ''
+        aiChipsFor().forEach(function (q) {
+          var b = document.createElement('button')
+          b.type = 'button'
+          b.className = 'ai-chip'
+          b.textContent = q
+          b.onclick = function () {
+            aiSend(q)
+          }
+          chips.appendChild(b)
+        })
+      }
+
+      function aiClear() {
+        if (aiBusy) return
+        aiHist = []
+        document.getElementById('aiMsgs').innerHTML = ''
+        aiShowStart()
+      }
+
+      function openAskAI() {
+        var who = session.role + '|' + session.name
+        if (aiForUser !== who) {
+          aiForUser = who
+          aiHist = []
+          document.getElementById('aiMsgs').innerHTML = ''
+          aiShowStart()
+        }
+        var tag = document.getElementById('aiRoleTag')
+        tag.textContent = !session.token
+          ? 'ผู้ใช้ทั่วไป'
+          : session.role === 'IT'
+          ? 'IT'
+          : 'แอดมิน'
+        document.getElementById('aiInput').maxLength = can('ADMIN') ? 500 : 300
+        bsModal('aiModal').show()
+        setTimeout(function () {
+          document.getElementById('aiInput').focus()
+        }, 350)
+      }
+
+      function aiKey(e) {
+        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+          e.preventDefault()
+          aiSend()
+        }
+      }
+
+      function aiSend(text) {
+        if (aiBusy) return
+        var inp = document.getElementById('aiInput')
+        var q = String(text != null ? text : inp.value)
+          .trim()
+          .substring(0, can('ADMIN') ? 500 : 300)
+        if (!q) return
+        inp.value = ''
+        document.getElementById('aiChips').innerHTML = ''
+        aiAdd('u', q)
+        aiBusy = true
+        document.getElementById('aiSend').disabled = true
+        var typing = aiAdd('a', '', 'ai-typing')
+        typing.innerHTML = '<span></span><span></span><span></span>'
+        gsRun(
+          'askAI',
+          q,
+          session.token,
+          getOperator(),
+          getClientId(),
+          aiHist.slice(-8)
+        )
+          .then(function (res) {
+            typing.remove()
+            if (res && res.success) {
+              aiHist.push({ r: 'u', t: q }, { r: 'a', t: res.answer })
+              aiHist = aiHist.slice(-16)
+              aiAdd('a', res.answer)
+            } else aiAdd('a', (res && res.message) || 'ไม่สำเร็จ', 'err')
+          })
+          .catch(function (e) {
+            typing.remove()
+            aiAdd('a', String(e), 'err')
+          })
+          .then(function () {
+            aiBusy = false
+            document.getElementById('aiSend').disabled = false
+            inp.focus()
+          })
+      }
+
+      function onError(err) {
+        Swal.close()
+        Swal.fire('เกิดข้อผิดพลาด', err.toString(), 'error')
+      }
+
+      function populateDropdown(type) {
+        const isCat = type === 'category'
+        const inputId = isCat ? 'assetCategory' : 'assetLocation'
+        const menu = document.getElementById(
+          isCat ? 'catDropdownMenu' : 'locDropdownMenu'
+        )
+        const values = isCat ? categoriesList : locationsList
+        menu.innerHTML = ''
+        if (!values.length) {
+          menu.innerHTML =
+            '<li><span class="dropdown-item-text text-muted">ยังไม่มีรายการ พิมพ์เพิ่มได้เลย</span></li>'
+          return
+        }
+        values.forEach(val => {
+          const li = document.createElement('li')
+          const a = document.createElement('a')
+          a.className = 'dropdown-item'
+          a.href = '#'
+          a.textContent = val
+          a.addEventListener('click', ev => {
+            ev.preventDefault()
+            document.getElementById(inputId).value = val
+          })
+          li.appendChild(a)
+          menu.appendChild(li)
+        })
+      }
+
+      // =========================================================================
+      // 🌟 ฟังก์ชัน renderAssetTable (ฉบับสมบูรณ์ รองรับรูปภาพ, คอลัมน์หมายเหตุ Col P, และปุ่มจัดการครบถ้วน)
+      // =========================================================================
+      function renderAssetTable(assets) {
+        var tbody = document.getElementById('assetTableBody')
+        if (!tbody) return
+
+        // ป้องกัน Error กรณี assets ไม่ใช่อาเรย์หรือเป็นค่าว่าง
+        if (!assets || !Array.isArray(assets) || assets.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="13" class="text-center py-4 text-muted">ไม่พบข้อมูลอุปกรณ์</td></tr>'
+          return
+        }
+
+        var NOIMG = 'https://placehold.co/150x150?text=No+Img'
+        var out = []
+
+        assets.forEach(function (item) {
+          if (!item) return // ข้ามกรณีข้อมูลแถวเป็นค่าว่าง
+
+          var code = String(item[3] || '').trim()
+          var c = escapeHtml(code)
+          var status = String(item[13] || 'ไม่ระบุ').trim()
+
+          var imgColumnVal = String(item[2] || '').trim()
+          var urls = imgColumnVal
+            ? imgColumnVal
+                .split(',')
+                .map(function (u) {
+                  return u.trim()
+                })
+                .filter(function (u) {
+                  return u !== ''
+                })
+            : []
+          var mainImg = urls.length > 0 ? urls[0] : NOIMG
+
+          // แก้ไขจุดคำนวณ Badge จำนวนรูปภาพเพิ่มเติมให้ถูกต้องและปลอดภัย
+          var extraImagesBadge =
+            urls.length > 1
+              ? '<span class="badge bg-secondary" style="font-size:0.65rem;">+' +
+                (urls.length - 1) +
+                '</span>'
+              : ''
+
+          var imgHtml =
+            '<div class="d-flex align-items-center gap-1" style="cursor:pointer;" onclick="openImageGallery(\'' +
+            encodeURIComponent(imgColumnVal) +
+            '\')">' +
+            '<img src="' +
+            escapeHtml(mainImg) +
+            '" class="asset-img" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=\'' +
+            NOIMG +
+            '\'">' +
+            extraImagesBadge +
+            '</div>'
+
+          var qrUrl =
+            'https://quickchart.io/qr?size=100&text=' +
+            encodeURIComponent(qrText(code))
+
+          var badge = '<span class="badge badge-available">พร้อมใช้งาน</span>'
+          if (status === 'ถูกยืม') {
+            badge = '<span class="badge badge-borrowed">ถูกยืม</span>'
+          } else if (status !== 'พร้อมใช้งาน') {
+            badge =
+              '<span class="badge badge-repair">' +
+              escapeHtml(status) +
+              '</span>'
+          }
+
+          // ตรวจสอบฟังก์ชัน myActiveBorrows ว่ามีอยู่จริงหรือไม่เพื่อป้องกัน Error
+          var hasActiveBorrow =
+            typeof myActiveBorrows === 'function' &&
+            myActiveBorrows(code).length > 0
+          var returnBtnHtml = hasActiveBorrow
+            ? '<button class="btn btn-sm btn-success me-1" data-act="ret" data-code="' +
+              c +
+              '" title="คืนอุปกรณ์"><i class="fa-solid fa-rotate-left"></i></button>'
+            : ''
+
+          out.push(
+            '<tr>' +
+              '<td><input type="checkbox" class="asset-checkbox form-check-input" value="' +
+              c +
+              '"' +
+              (selectedCodes.has(code) ? ' checked' : '') +
+              '></td>' +
+              '<td>' +
+              imgHtml +
+              '</td>' +
+              '<td><img src="' +
+              escapeHtml(qrUrl) +
+              '" class="qr-thumb" data-act="qr" data-code="' +
+              c +
+              '" data-qr="' +
+              escapeHtml(qrUrl) +
+              '" title="ดู QR Code"></td>' +
+              '<td class="fw-bold">' +
+              c +
+              '</td>' +
+              '<td>' +
+              escapeHtml(item[4] || '') +
+              '</td>' +
+              '<td>' +
+              escapeHtml(item[5] || '-') +
+              '</td>' +
+              '<td>' +
+              escapeHtml(item[6] || '-') +
+              holderHtml(code) +
+              '</td>' +
+              '<td><small class="text-muted">' +
+              escapeHtml(item[15] || '-') +
+              '</small></td>' +
+              '<td class="text-center">' +
+              escapeHtml(item[10] || 0) +
+              '</td>' +
+              '<td class="text-center">' +
+              escapeHtml(item[11] || 0) +
+              '</td>' +
+              '<td class="text-center fw-bold">' +
+              escapeHtml(item[12] || 0) +
+              '</td>' +
+              '<td class="text-center">' +
+              badge +
+              '</td>' +
+              '<td class="text-center">' +
+              returnBtnHtml +
+              '<button class="btn btn-sm btn-outline-primary me-1" data-act="edit" data-code="' +
+              c +
+              '" title="แก้ไข"><i class="fa-solid fa-pen"></i></button>' +
+              '<button class="btn btn-sm btn-outline-danger" data-act="del" data-code="' +
+              c +
+              '" title="ลบ"><i class="fa-solid fa-trash"></i></button>' +
+              '</td></tr>'
+          )
+        })
+
+        tbody.innerHTML = out.join('')
+        if (typeof syncSelectAll === 'function') {
+          syncSelectAll()
+        }
+      }
+
+      // รายการที่ยังไม่คืนของรหัสนี้ (ใช้แสดงว่าตอนนี้ใครถืออยู่ที่ไหน)
+      function activeBorrowsOf(code) {
+        var k = cleanCode(code)
+        return (globalBorrows || []).filter(function (r) {
+          return r[8] === 'กำลังยืม' && cleanCode(r[1]) === k
+        })
+      }
+
+      function daysOutText(s) {
+        var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(String(s || ''))
+        if (!m) return ''
+        var d = new Date(+m[3], +m[2] - 1, +m[1])
+        var n = Math.max(0, Math.floor((Date.now() - d.getTime()) / 86400000))
+        return ' · ' + (n === 0 ? 'วันนี้' : n + ' วัน')
+      }
+
+      // บรรทัด "คืนล่าสุดโดย X วางที่ Y" (ไว้ถามคนล่าสุดได้ทันที ไม่ต้องไล่ดูประวัติ)
+      function lastReturnHtml(code) {
+        var lr = lastRet[String(code || '').trim()]
+        if (!lr) return ''
+        var day = String(lr.at || '').split(' ')[0]
+        return (
+          '<div class="small text-muted"><i class="fa-solid fa-rotate-left me-1"></i>คืนล่าสุด ' +
+          escapeHtml(lr.by || '-') +
+          (lr.loc ? ' · วางที่ ' + escapeHtml(lr.loc) : '') +
+          (day ? ' · ' + escapeHtml(day) : '') +
+          '</div>'
+        )
+      }
+
+      function holderHtml(code) {
+        var rows = activeBorrowsOf(code)
+        if (!rows.length) return lastReturnHtml(code)
+        var shown = rows.slice(0, 2).map(function (r) {
+          var place = String(r[7] || '')
+            .replace(/^'/, '')
+            .trim()
+          return (
+            '<div class="small text-warning"><i class="fa-solid fa-person-walking me-1"></i>' +
+            escapeHtml(r[6]) +
+            (place && place !== '-' ? ' @ ' + escapeHtml(place) : '') +
+            daysOutText(r[4]) +
+            '</div>'
+          )
+        })
+        if (rows.length > 2)
+          shown.push(
+            '<div class="small text-muted">และอีก ' +
+              (rows.length - 2) +
+              ' รายการ</div>'
+          )
+        return shown.join('')
+      }
+
+      function syncSelectAll() {
+        var all = document.querySelectorAll('.asset-checkbox')
+        var on = document.querySelectorAll('.asset-checkbox:checked')
+        var m = document.getElementById('selectAll')
+        if (!m) return
+        m.checked = all.length > 0 && on.length === all.length
+        m.indeterminate = on.length > 0 && on.length < all.length
+      }
+
+      document.addEventListener('change', function (e) {
+        if (e.target.classList && e.target.classList.contains('asset-checkbox'))
+          syncSelectAll()
+      })
+
+      const BOX_PRESETS = {
+        A: { label: 'ชุด A (กล่อง 1, 2, 3)', codes: ['1', '2', '3'] },
+        B: { label: 'ชุด B (กล่อง 2, 3)', codes: ['2', '3'] },
+        C: { label: 'ชุด C (กล่อง 2)', codes: ['2'] },
+        D: { label: 'ชุด D (กล่อง 1)', codes: ['1'] }
+      }
+
+      function applyBoxPreset(presetKey) {
+        var preset = BOX_PRESETS[presetKey]
+        if (!preset || !Array.isArray(preset.codes)) return
+
+        var added = []
+        var skipped = []
+
+        preset.codes.forEach(function (rawCode) {
+          var code = String(rawCode || '').trim()
+          if (!code) return
+          var res = addToCart(code)
+          if (res && res.ok) {
+            added.push(code)
+          } else {
+            skipped.push(code + (res && res.msg ? ' (' + res.msg + ')' : ''))
+          }
+        })
+
+        renderCart()
+        if (added.length) beep()
+
+        if (added.length && !skipped.length) {
+          toast('success', 'เพิ่ม ' + preset.label + ' แล้ว')
+        } else if (added.length && skipped.length) {
+          toast(
+            'warning',
+            'เพิ่มได้บางส่วน: ' +
+              added.join(', ') +
+              ' | ข้าม: ' +
+              skipped.join(', ')
+          )
+        } else {
+          toast('warning', 'ไม่สามารถเพิ่มชุดนี้ได้: ' + skipped.join(', '))
+        }
+      }
+
+      document.addEventListener('click', function (e) {
+        var btn = e.target.closest('#boxPresetList [data-preset]')
+        if (!btn) return
+        e.preventDefault()
+        applyBoxPreset(btn.dataset.preset)
+      })
+
+      function myActiveBorrows(code) {
+        var rows = activeBorrowsOf(code)
+        var me = normNm(getOperator())
+        if (!rows.length) return []
+        if (can('ADMIN') || !me) return rows
+        var mine = rows.filter(function (r) {
+          return normNm(r[6]) === me
+        })
+        return mine.length ? mine : rows
+      }
+
+      function returnFromAsset(code) {
+        var list = myActiveBorrows(code)
+        if (!list.length) {
+          toast('info', 'ไม่พบรายการค้างยืมของรหัส ' + code)
+          return
+        }
+        returnAssetItem(list[0][1], list[0][11])
+      }
+    </script>
+  </body>
+</html>
